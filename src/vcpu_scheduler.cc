@@ -41,15 +41,25 @@ namespace virt {
         for (int32_t i = 0; i < v_domains_num_; ++i) {
             LOG(INFO) << "###### Domain Name: "<< virDomainGetName(v_domains_[i])
                       << " ######\n";
-            CpuInfoPtr vcpu_info_ptr(new CpuInfo(v_domains_[i]));
+            CpuInfoPtr vcpu_info_ptr(new CpuInfo(v_conn_ptr_, v_domains_[i]));
             vec_vcpu_info_[v_domains_[i]] = vcpu_info_ptr;
         }
     }
 
-    void CpuScheduler::run(size_t time_intervals) {
-        CHECK_GE(time_intervals, 0);
+    void CpuScheduler::getHostCpusInfo() {
+        LOG(INFO) << "###### Host Name: "<< virConnectGetHostname(v_conn_ptr_)
+                  << " ######\n";
+        LOG(INFO) << "CPU Model: " << getHostCpuModel() << std::endl;
+        LOG(INFO) << "CPU Numbers: " << getHostCpuNum() << std::endl;
+        LOG(INFO) << "CPU Frequency (Mhz): " << getHostFrequency() << std::endl;
+        LOG(INFO) << "CPU :" << GetHostMemory() << " MB" << std::endl; 
+    }
+
+    void CpuScheduler::run(size_t timeIntervals) {
+        CHECK_GE(timeIntervals, 0);
+        getHostCpusInfo();
         getAllActiveRunningVMs();
-        sleep(time_intervals);
+        sleep(timeIntervals);
     }
 }
 
@@ -58,11 +68,11 @@ int main (int argc, const char** argv) {
     CHECK_EQ(argc, 2) << "Please provide one argument "
         <<"[time internal (secs)] for schedulers.\n";
 
-    size_t time_intervals = atoi(argv[1]);
+    size_t timeIntervals = atoi(argv[1]);
     CpuSchedulerPtr cpuScheduler(new CpuScheduler);
     while(1) {
         // intialize CpuScheduler and connect to hybervisor
-        cpuScheduler->run(time_intervals);
+        cpuScheduler->run(timeIntervals);
     }
     return 0;
 }

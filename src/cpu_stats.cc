@@ -4,9 +4,11 @@
 
 namespace virt {
     void CpuInfo::init() {
-        max_id_ = virDomainGetCPUStats(v_domain_ptr_, NULL, 0, 0, 0, 0);
+        getOSType();
+
+        max_id_ = virDomainGetCPUStats(vcpu_domain_ptr_, NULL, 0, 0, 0, 0);
         LOG(INFO) << "vCPUs num: " << max_id_;
-        nparams_ = virDomainGetCPUStats(v_domain_ptr_, NULL, 0, 0, 1, 0);
+        nparams_ = virDomainGetCPUStats(vcpu_domain_ptr_, NULL, 0, 0, 1, 0);
 
         CHECK(nparams_ >= 0 && max_id_ >= 0) << "Failed to get CPU stats.\n";
         begin_params_ = (virTypedParameterPtr)calloc(
@@ -20,7 +22,7 @@ namespace virt {
         CHECK_GE(gettimeofday(&begin_, NULL), 0) << "Failed to get time.\n";
         /// get current cpu stats
         begin_nparams_ = virDomainGetCPUStats(
-                    v_domain_ptr_, begin_params_, nparams_, 0, max_id_, 0);
+                    vcpu_domain_ptr_, begin_params_, nparams_, 0, max_id_, 0);
         CHECK_GE(begin_nparams_, 0) << "Failed to get cpu stats.\n";
 
         usleep(300 * 1000); /// 300 microseconds
@@ -29,8 +31,19 @@ namespace virt {
         CHECK_GE(gettimeofday(&end_, NULL), 0) << "Failed to get time.\n";
         /// get next cpu stats
         end_nparams_ = virDomainGetCPUStats(
-                    v_domain_ptr_, end_params_, nparams_, 0, max_id_, 0);
+                    vcpu_domain_ptr_, end_params_, nparams_, 0, max_id_, 0);
         CHECK_GE(end_nparams_, 0) << "Failed to get cpu stats.\n";        
+    }
+
+    void CpuInfo::vCpuMapsInfo() {
+        vcpu_info_ptr_ = new virVcpuInfo[max_id_];
+        virNodeInfo vCpuNodeInfo;
+        virNodeGetInfo(vcpu_conn_ptr_, &vCpuNodeInfo);
+        size_t cpuMapLen = VIR_CPU_MAPLEN(vCpuNodeInfo.cpus);
+        vcpu_maps_ = (unsigned char*)calloc(max_id_, cpuMapLen);
+        CHECK_NE(virDomainGetVcpus(vcpu_domain_ptr_, vcpu_info_ptr_,
+                 max_id_, vcpu_maps_, cpuMapLen), -1)
+                 << "virDomainGetVcpus function failed.\n";
     }
 
     void CpuInfo::vCpuUsageInfo() {
@@ -42,7 +55,7 @@ namespace virt {
         double cpuDiff, realDiff;
 
         // OS Type
-        LOG(INFO) << "OS Type: " << os_type_ << std::endl;
+        LOG(INFO) << "OS Type: " << vcpu_os_type_ << std::endl;
 
         // CPU Usage
         for (int32_t i = 0; i < max_id_; ++i) {

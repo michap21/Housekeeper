@@ -14,13 +14,16 @@ namespace virt
         public:
         DISABLE_COPY(CpuInfo);
 
-        CpuInfo(virDomainPtr v_domain_ptr) : v_domain_ptr_(v_domain_ptr){
+        CpuInfo(virConnectPtr connPtr, virDomainPtr domainPtr)
+            : vcpu_conn_ptr_(connPtr), vcpu_domain_ptr_(domainPtr){
             init();
-            getOSType();
             vCpuUsageInfo();
+            vCpuMapsInfo();
         }
         ~CpuInfo(){
             /// free resource
+            delete [] vcpu_info_ptr_;
+            free(vcpu_maps_);
             virTypedParamsFree(begin_params_, begin_nparams_ * max_id_);
             virTypedParamsFree(end_params_, end_nparams_ * max_id_);
         }
@@ -30,11 +33,15 @@ namespace virt
         void init();
         /// stats vCpu usage
         void vCpuUsageInfo();
-        /// get OS type
-        inline void getOSType() {os_type_= virDomainGetOSType(v_domain_ptr_);}
+        /// the current mao bewteen VCPU and PCPU
+        void vCpuMapsInfo();
 
-        virDomainPtr v_domain_ptr_;         /// vcpu domain pointer
-        std::string os_type_;               /// domain os type 
+        /// get OS type
+        inline void getOSType() {vcpu_os_type_= virDomainGetOSType(vcpu_domain_ptr_);}
+
+        virConnectPtr vcpu_conn_ptr_;
+        virDomainPtr  vcpu_domain_ptr_;     /// vcpu domain pointer
+        std::string   vcpu_os_type_;        /// domain os type
         int max_id_;                        /// number of vCpus
         int nparams_;                       /// number of params per vCPU
         int begin_nparams_;                 /// number of params for different state of vCPU
@@ -42,6 +49,9 @@ namespace virt
         virTypedParameterPtr begin_params_; /// param ptr for different state of vCPU
         virTypedParameterPtr end_params_;   /// param ptr for different state of vCPU
         struct timeval begin_, end_;        /// time intervals for cpu usage stats
+
+        unsigned char  *vcpu_maps_;         /// vcpu bitmaps
+        virVcpuInfoPtr  vcpu_info_ptr_;     /// vcpu info
     };
     typedef std::shared_ptr<CpuInfo> CpuInfoPtr;
 }
