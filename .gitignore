@@ -2,3 +2,5 @@ build
 .browse.VC*
 .cmaketools.json
 launch.json
+yes
+yes.pub

@@ -16,6 +16,7 @@ namespace virt
 
         CpuInfo(virDomainPtr v_domain_ptr) : v_domain_ptr_(v_domain_ptr){
             init();
+            getOSType();
             vCpuUsageInfo();
         }
         ~CpuInfo(){
@@ -29,8 +30,11 @@ namespace virt
         void init();
         /// stats vCpu usage
         void vCpuUsageInfo();
-        
+        /// get OS type
+        inline void getOSType() {os_type_= virDomainGetOSType(v_domain_ptr_);}
+
         virDomainPtr v_domain_ptr_;         /// vcpu domain pointer
+        std::string os_type_;               /// domain os type 
         int max_id_;                        /// number of vCpus
         int nparams_;                       /// number of params per vCPU
         int begin_nparams_;                 /// number of params for different state of vCPU

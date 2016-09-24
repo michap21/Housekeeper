@@ -27,13 +27,15 @@ namespace virt {
         virConnectPtr getVirConnectPtr() { return v_conn_ptr_; }
         virDomainPtr*  getVirDomainPtr () { return v_domains_; }
         size_t getDomainsNum() { return v_domains_num_; }
-        /// get all active running virtual machine
-        void getAllActiveRunningVMs();
+        
+        void run(size_t time_intervals = 10);
 
         private:
         inline void freeDomainsResource();
         /// connect to hybervisor
         inline virConnectPtr connect2Hybervisor(const char* name);
+        /// get all active running virtual machine
+        inline void getAllActiveRunningVMs();
 
         virConnectPtr v_conn_ptr_;
         size_t v_domains_num_;

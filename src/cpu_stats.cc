@@ -32,7 +32,7 @@ namespace virt {
                     v_domain_ptr_, end_params_, nparams_, 0, max_id_, 0);
         CHECK_GE(end_nparams_, 0) << "Failed to get cpu stats.\n";        
     }
-    
+
     void CpuInfo::vCpuUsageInfo() {
         CHECK_GE(max_id_, 0);
         CHECK_NOTNULL(begin_params_);
@@ -40,6 +40,11 @@ namespace virt {
         CHECK_EQ(begin_nparams_, end_nparams_);
         double vCpuUsage;
         double cpuDiff, realDiff;
+
+        // OS Type
+        LOG(INFO) << "OS Type: " << os_type_ << std::endl;
+
+        // CPU Usage
         for (int32_t i = 0; i < max_id_; ++i) {
             cpuDiff = (end_params_[end_nparams_ * i].value.ul -
                 begin_params_[begin_nparams_ * i].value.ul) / 1000;

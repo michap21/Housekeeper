@@ -27,10 +27,10 @@ namespace virt {
         vec_vcpu_info_.clear();
     }
 
-    void CpuScheduler::getAllActiveRunningVMs() {
+    inline void CpuScheduler::getAllActiveRunningVMs() {
         freeDomainsResource();
         unsigned int flags = VIR_CONNECT_LIST_DOMAINS_ACTIVE
-                            | VIR_CONNECT_LIST_DOMAINS_RUNNING;
+                           | VIR_CONNECT_LIST_DOMAINS_RUNNING;
 
         v_domains_num_ = virConnectListAllDomains(v_conn_ptr_, &v_domains_, flags);                   
         CHECK_GE(v_domains_num_, 0)
@@ -45,6 +45,12 @@ namespace virt {
             vec_vcpu_info_[v_domains_[i]] = vcpu_info_ptr;
         }
     }
+
+    void CpuScheduler::run(size_t time_intervals) {
+        CHECK_GE(time_intervals, 0);
+        getAllActiveRunningVMs();
+        sleep(time_intervals);
+    }
 }
 
 int main (int argc, const char** argv) {
@@ -53,11 +59,10 @@ int main (int argc, const char** argv) {
         <<"[time internal (secs)] for schedulers.\n";
 
     size_t time_intervals = atoi(argv[1]);
-    CpuSchedulerPtr cpuScheduler(new CpuScheduler());
+    CpuSchedulerPtr cpuScheduler(new CpuScheduler);
     while(1) {
         // intialize CpuScheduler and connect to hybervisor
-        cpuScheduler->getAllActiveRunningVMs();
-        sleep(time_intervals);
+        cpuScheduler->run(time_intervals);
     }
     return 0;
 }
