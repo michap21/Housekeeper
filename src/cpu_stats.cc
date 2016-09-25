@@ -41,9 +41,35 @@ namespace virt {
         virNodeGetInfo(vcpu_conn_ptr_, &vCpuNodeInfo);
         size_t cpuMapLen = VIR_CPU_MAPLEN(vCpuNodeInfo.cpus);
         vcpu_maps_ = (unsigned char*)calloc(max_id_, cpuMapLen);
+
+        LOG(INFO) << "This Domain supports maximum VCPUs num: "
+                  << virDomainGetMaxVcpus(vcpu_domain_ptr_) << std::endl;
+        LOG(INFO) << "This Domain uses VCPUs num: "
+                  << virDomainGetVcpusFlags(vcpu_domain_ptr_,
+                     VIR_DOMAIN_AFFECT_CURRENT | VIR_DOMAIN_AFFECT_LIVE)
+                  << std::endl;
+
         CHECK_NE(virDomainGetVcpus(vcpu_domain_ptr_, vcpu_info_ptr_,
                  max_id_, vcpu_maps_, cpuMapLen), -1)
                  << "virDomainGetVcpus function failed.\n";
+
+        LOG(INFO) << "---------PCPUs-to-VCPUs----------" << std::endl;
+        int cnt = 0;
+        for (int32_t i = 0; i < max_id_; ++i) {
+            if (vcpu_maps_[i] == 0) {
+                LOG(INFO) << "VCPU No." << i << " is offline!" << std::endl;
+            } else {
+                cnt = 0;
+                while(vcpu_maps_[i]) {
+                    if (vcpu_maps_[i] & 1) {
+                        LOG(INFO) << "PCPU No." << cnt << " map to VCPU No."
+                                  << i << std::endl;
+                    }
+                    vcpu_maps_[i] >>= 1;
+                    cnt++;
+                }
+            }
+        }        
     }
 
     void CpuInfo::vCpuUsageInfo() {
