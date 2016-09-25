@@ -35,14 +35,20 @@ namespace virt
         void vCpuUsageInfo();
         /// the current mao bewteen VCPU and PCPU
         void vCpuMapsInfo();
-
+        /// get vm support VCPUs num
+        inline void getSupportVCPUsNum();
         /// get OS type
         inline void getOSType() {vcpu_os_type_= virDomainGetOSType(vcpu_domain_ptr_);}
+        /// get VCpus bitmap info
+        inline void getVCpusMapinfo();
+        /// get virVcpusInfo structure info
+        inline void getVCpusInfo();
 
         virConnectPtr vcpu_conn_ptr_;
         virDomainPtr  vcpu_domain_ptr_;     /// vcpu domain pointer
         std::string   vcpu_os_type_;        /// domain os type
         int max_id_;                        /// number of vCpus
+        int use_id_;                        /// number of used vCpus
         int nparams_;                       /// number of params per vCPU
         int begin_nparams_;                 /// number of params for different state of vCPU
         int end_nparams_;                   /// number of params for different state of vCPU
