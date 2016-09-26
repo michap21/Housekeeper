@@ -1,5 +1,5 @@
 #include <iomanip>
-#include "cpu_stats.h"
+#include "vcpu_stats.h"
 #include "log.h"
 
 namespace virt {
@@ -82,8 +82,6 @@ namespace virt {
                     vcpu_domain_ptr_, end_params_, nparams_, -1, max_id_, 0);
         CHECK_GE(end_nparams_, 0) << "Failed to get cpu stats.\n";        
     }
-
-
 
     void CpuInfo::vCpuMapsInfo() {
         vcpu_info_ptr_ = new virVcpuInfo[max_id_];

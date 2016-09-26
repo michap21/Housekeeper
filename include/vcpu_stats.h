@@ -59,5 +59,5 @@ namespace virt
         unsigned char  *vcpu_maps_;         /// vcpu bitmaps
         virVcpuInfoPtr  vcpu_info_ptr_;     /// vcpu info
     };
-    typedef std::shared_ptr<CpuInfo> CpuInfoPtr;
+    typedef std::unique_ptr<CpuInfo> CpuInfoPtr;
 }

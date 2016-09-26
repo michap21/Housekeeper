@@ -15,6 +15,11 @@ namespace virt {
         return conn;
     }
     
+    inline void CpuScheduler::freeHostResource() {
+        delete p_cpu_ptr_;
+        p_cpu_ptr_ = nullptr;
+    }
+
     inline void CpuScheduler::freeDomainsResource() {
         if (v_domains_ != nullptr && v_domains_num_ != 0) {
             for (int32_t i = 0; i < v_domains_num_; ++i) {
@@ -27,38 +32,30 @@ namespace virt {
         vec_vcpu_info_.clear();
     }
 
-    inline void CpuScheduler::getAllActiveRunningVMs() {
+    inline void CpuScheduler::getAllActiveRunningVMs(unsigned int flags) {
+        /// before query VMs stats info, first need free previous resource.
         freeDomainsResource();
-        unsigned int flags = VIR_CONNECT_LIST_DOMAINS_ACTIVE
-                           | VIR_CONNECT_LIST_DOMAINS_RUNNING;
 
+        /// query all active and running domains.
         v_domains_num_ = virConnectListAllDomains(v_conn_ptr_, &v_domains_, flags);                   
         CHECK_GE(v_domains_num_, 0)
             << "Failed to list all active and running domains!\n";
         LOG(INFO) << "Get all active and runnning virtual machines successful!\n";
         LOG(INFO) << "CpuScheduler contains " << v_domains_num_ << " VM domains.\n";
-
+        
+        /// for each domain, query and print all needed info.
         for (int32_t i = 0; i < v_domains_num_; ++i) {
             LOG(INFO) << "###### Domain Name: "<< virDomainGetName(v_domains_[i])
                       << " ######\n";
             CpuInfoPtr vcpu_info_ptr(new CpuInfo(v_conn_ptr_, v_domains_[i]));
-            vec_vcpu_info_[v_domains_[i]] = vcpu_info_ptr;
+            vec_vcpu_info_[v_domains_[i]] = std::move(vcpu_info_ptr);
         }
-    }
-
-    void CpuScheduler::getHostCpusInfo() {
-        LOG(INFO) << "###### Host Name: "<< virConnectGetHostname(v_conn_ptr_)
-                  << " ######\n";
-        LOG(INFO) << "CPU Model: " << getHostCpuModel() << std::endl;
-        LOG(INFO) << "CPU Numbers: " << getHostCpuNum() << std::endl;
-        LOG(INFO) << "CPU Frequency (Mhz): " << getHostFrequency() << std::endl;
-        LOG(INFO) << "CPU :" << GetHostMemory() << " MB" << std::endl; 
     }
 
     void CpuScheduler::run(size_t timeIntervals) {
         CHECK_GE(timeIntervals, 0);
-        getHostCpusInfo();
-        getAllActiveRunningVMs();
+        this->p_cpu_ptr_->getHostCpusInfo();
+        this->getAllActiveRunningVMs();
         sleep(timeIntervals);
     }
 }
