@@ -11,24 +11,23 @@
 #include "pcpu_stats.h"
 
 namespace virt {
-    #define STARVE_DOMAIN_THREHOLD  100 * 1024 * 1024   /* starvation threshold KB */
-    #define WASTES_DOMAIN_THREHOLD  300 * 1024 * 1024   /* waste threhold KB */
+    #define STARVE_DOMAIN_THREHOLD  100 * 1024   /* starvation threshold KB */
+    #define WASTES_DOMAIN_THREHOLD  300 * 1024   /* waste threhold KB */
 
     typedef enum {
         VIR_MEM_STARVE = 0,
         VIR_MEM_WASTES = 1,
         VIR_MEM_NORMAL = 2,
-        VIR_MEM_BOTHSW = 3,
         VIR_MEM_END
     } vir_mem_state_t;
 
     typedef struct {
-        double          v_cpu_usage_;        /* domain vcpus usage: % */
-        size_t          v_unused_memory_;    /* KB unused memory in domain */
-        vir_mem_state_t v_memory_state_;     /* memory state: starve, waste or both */
-
+        virDomainPtr    v_domain_ptr_;
+        double          v_cpu_usage_;     /* domain vcpus usage: % */
+        size_t          v_unused_mem_;    /* KB unused memory in domain */
+        vir_mem_state_t v_mem_state_;     /* memory state: starve, waste or both */
     } vir_domain_st;
-    typedef std::unique_ptr<vir_domain_st> virDomainInfoPtr;
+    typedef std::shared_ptr<vir_domain_st> virDomainInfoPtr;
 
     class LocalEngine {
         public:
@@ -92,23 +91,25 @@ namespace virt {
                 LOG(INFO) << "Domain Name: "
                           << virDomainGetName(v_domains_[i]) << std::endl;
                 
-                size_t mem_unused = mem_stats[VIR_DOMAIN_MEMORY_STAT_UNUSED].val;
-                m_domain_info_[v_domains_[i]]->v_unused_memory_ = mem_unused;
+                size_t mem_available = mem_stats[VIR_DOMAIN_MEMORY_STAT_AVAILABLE].val;
           
-                LOG(INFO) << "Unused Memory: " <<  mem_unused / 1024.0 << " MB\n";
-                LOG(INFO) << "Swap Out: " << mem_stats[VIR_DOMAIN_MEMORY_STAT_SWAP_OUT].val
-                          << std::endl;
-                LOG(INFO) << "Swap In: " << mem_stats[VIR_DOMAIN_MEMORY_STAT_SWAP_IN].val
-                          << std::endl;
-                LOG(INFO) << "Available: " << mem_stats[VIR_DOMAIN_MEMORY_STAT_AVAILABLE].val
-                          << std::endl;         
+                LOG(INFO) << "Unuse Mem: " << mem_stats[VIR_DOMAIN_MEMORY_STAT_UNUSED].val / 1024.0
+                          << " MB" << std::endl;
+                LOG(INFO) << "Swap Out: " << mem_stats[VIR_DOMAIN_MEMORY_STAT_SWAP_OUT].val / 1024.0
+                          << " MB" << std::endl;
+                LOG(INFO) << "Swap In: " << mem_stats[VIR_DOMAIN_MEMORY_STAT_SWAP_IN].val / 1024.0
+                          << " MB" << std::endl;
+                LOG(INFO) << "Available: " << mem_stats[VIR_DOMAIN_MEMORY_STAT_AVAILABLE].val / 1024.0
+                          << " MB" << std::endl;
                 
-                if (mem_unused <= STARVE_DOMAIN_THREHOLD) {
-                    m_domain_info_[v_domains_[i]]->v_memory_state_ = VIR_MEM_STARVE;
-                } else if (mem_unused >= WASTES_DOMAIN_THREHOLD) {
-                    m_domain_info_[v_domains_[i]]->v_memory_state_ = VIR_MEM_WASTES;
+                m_domain_info_[v_domains_[i]]->v_unused_mem_ = mem_available;
+                
+                if (mem_available <= STARVE_DOMAIN_THREHOLD) {
+                    m_domain_info_[v_domains_[i]]->v_mem_state_ = VIR_MEM_STARVE;
+                } else if (mem_available >= WASTES_DOMAIN_THREHOLD) {
+                    m_domain_info_[v_domains_[i]]->v_mem_state_ = VIR_MEM_WASTES;
                 } else {
-                    m_domain_info_[v_domains_[i]]->v_memory_state_ = VIR_MEM_NORMAL;
+                    m_domain_info_[v_domains_[i]]->v_mem_state_ = VIR_MEM_NORMAL;
                 }         
 
             }
@@ -156,6 +157,7 @@ namespace virt {
             LOG(INFO) << "CpuScheduler contains " << v_domains_num_ << " VM domains.\n";
         }
 
+        protected:
         size_t v_domains_num_;
         virDomainPtr*  v_domains_;
         virConnectPtr  v_conn_ptr_;

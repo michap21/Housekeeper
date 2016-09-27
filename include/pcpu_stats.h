@@ -15,8 +15,6 @@ namespace virt {
                 << "Failed to Get Host Node Info.\n";
         }
         ~PCpuInfo() {
-            nparams_ = 0;
-            free(params_);
             delete v_node_ptr_;
         }
 
@@ -35,21 +33,23 @@ namespace virt {
             LOG(INFO) << "CPU Memory:" << GetHostMemory() / 1024.0 << " GB" << std::endl;
             
             int cellNum = VIR_NODE_MEMORY_STATS_ALL_CELLS;
-            if (virNodeGetMemoryStats(v_conn_ptr_, cellNum, NULL, &nparams_, 0) == 0 &&
-                nparams_ != 0) {
+            int nparams = 0;
+            virNodeMemoryStatsPtr params = nullptr;
+            if (virNodeGetMemoryStats(v_conn_ptr_, cellNum, NULL, &nparams, 0) == 0 &&
+                nparams != 0) {
                 constexpr int len = sizeof(virNodeMemoryStats);    
-                params_ = (virNodeMemoryStatsPtr)malloc(len * nparams_);
-                CHECK_NOTNULL(params_) << "Failed to allocate memory for Host Memory Stats.\n";
-                memset(params_, 0, len * nparams_);
-                CHECK_EQ(virNodeGetMemoryStats(v_conn_ptr_, cellNum, params_, &nparams_, 0), 0)
+                params = (virNodeMemoryStatsPtr)malloc(len * nparams);
+                CHECK_NOTNULL(params) << "Failed to allocate memory for Host Memory Stats.\n";
+                memset(params, 0, len * nparams);
+                CHECK_EQ(virNodeGetMemoryStats(v_conn_ptr_, cellNum, params, &nparams, 0), 0)
                     << "Failed to get host memory stats." << std::endl;
             }
 
-            for (int32_t i = 0; i < nparams_; ++i) {
-                LOG(INFO) << params_[i].field << ": " << params_[i].value / 1024 << "MB\n";
+            for (int32_t i = 0; i < nparams; ++i) {
+                LOG(INFO) << params[i].field << ": " << params[i].value / 1024 << "MB\n";
             }
-            assignHostUnusedMem();
-
+            assignHostUnusedMem(params, nparams);
+            free(params);
         }
 
         size_t getHostUnusedMem() {
@@ -65,18 +65,16 @@ namespace virt {
         }
 
         private:
-        inline void assignHostUnusedMem() {
-            size_t unused_mem = params_[0].value;
-            for (int32_t i = 1; i < nparams_; ++i) {
-                unused_mem -= params_[i].value;
+        inline void assignHostUnusedMem(virNodeMemoryStatsPtr params, int nparams) {
+            size_t unused_mem = params[0].value;
+            for (int32_t i = 1; i < nparams; ++i) {
+                unused_mem -= params[i].value;
             }
             p_unused_mem_ = unused_mem;
             LOG(INFO) << "unused: " << p_unused_mem_ / 1024.0 << "MB\n";
         }
 
         size_t p_unused_mem_;
-        int nparams_;
-        virNodeMemoryStatsPtr params_;
         virConnectPtr  v_conn_ptr_;
         virNodeInfoPtr v_node_ptr_;
     };
