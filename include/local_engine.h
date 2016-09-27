@@ -103,7 +103,6 @@ namespace virt {
                 LOG(INFO) << "Available: " << mem_stats[VIR_DOMAIN_MEMORY_STAT_AVAILABLE].val
                           << std::endl;         
                 
-                
                 if (mem_unused <= STARVE_DOMAIN_THREHOLD) {
                     m_domain_info_[v_domains_[i]]->v_memory_state_ = VIR_MEM_STARVE;
                 } else if (mem_unused >= WASTES_DOMAIN_THREHOLD) {
@@ -116,7 +115,7 @@ namespace virt {
         }
 
         void getPCpusInfo() { p_cpu_ptr_->getHostCpusInfo();}
-
+        void getPMemsInfo() { p_cpu_ptr_->getHostMemsInfo();}
         virtual void run(size_t time_intervals = 10) = 0;
 
         private:

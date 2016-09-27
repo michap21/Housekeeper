@@ -16,6 +16,7 @@ namespace virt {
          void run(size_t timeIntervals = 10) {
             CHECK_GE(timeIntervals, 0);
             getPCpusInfo();
+            getPMemsInfo();
             getVMemsInfo();
             sleep(timeIntervals);
          }
