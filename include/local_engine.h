@@ -24,7 +24,7 @@ namespace virt {
     typedef struct {
         virDomainPtr    v_domain_ptr_;
         double          v_cpu_usage_;     /* domain vcpus usage: % */
-        size_t          v_unused_mem_;    /* KB unused memory in domain */
+        size_t          v_mem_avail_;    /* KB unused memory in domain */
         vir_mem_state_t v_mem_state_;     /* memory state: starve, waste or both */
     } vir_domain_st;
     typedef std::shared_ptr<vir_domain_st> virDomainInfoPtr;
@@ -102,7 +102,7 @@ namespace virt {
                 LOG(INFO) << "Available: " << mem_stats[VIR_DOMAIN_MEMORY_STAT_AVAILABLE].val / 1024.0
                           << " MB" << std::endl;
                 
-                m_domain_info_[v_domains_[i]]->v_unused_mem_ = mem_available;
+                m_domain_info_[v_domains_[i]]->v_mem_avail_ = mem_available;
                 
                 if (mem_available <= STARVE_DOMAIN_THREHOLD) {
                     m_domain_info_[v_domains_[i]]->v_mem_state_ = VIR_MEM_STARVE;

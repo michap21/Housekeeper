@@ -47,8 +47,8 @@ namespace virt {
              wastes_it = wastes_domains_.begin();
              starve_it = starve_domains_.begin();
              for (int32_t i = 0; i < swap_size; ++i, ++wastes_it, ++starve_it) {
-                 size_t wastes_mem = wastes_it->second->v_unused_mem_;
-                 size_t starve_mem = starve_it->second->v_unused_mem_;
+                 size_t wastes_mem = wastes_it->second->v_mem_avail_;
+                 size_t starve_mem = starve_it->second->v_mem_avail_;
                  CHECK_EQ(virDomainSetMemory(wastes_it->first, wastes_mem - wastes_mem/2), 0)
                     << "Failed to set domain memory.\n";
                  CHECK_EQ(virDomainSetMemory(starve_it->first, starve_mem + wastes_mem/2), 0)
@@ -65,7 +65,7 @@ namespace virt {
                      LOG(INFO) << virDomainGetName(starve_it->first)
                                << " Memory is starvation. [Exchanged]\n";
                      CHECK_EQ(virDomainSetMemory(starve_it->first,
-                        starve_it->second->v_unused_mem_ + WASTES_DOMAIN_THREHOLD), 0)
+                        starve_it->second->v_mem_avail_ + WASTES_DOMAIN_THREHOLD), 0)
                         << "Failed to set domain memory.\n";
                  }
              } else if (starve_domains_.size() < wastes_domains_.size()) {
@@ -74,7 +74,7 @@ namespace virt {
                      LOG(INFO) << virDomainGetName(wastes_it->first)
                                << " Memory is waste. [Exchanged]\n";
                      CHECK_EQ(virDomainSetMemory(wastes_it->first,
-                        wastes_it->second->v_unused_mem_ - WASTES_DOMAIN_THREHOLD), 0)
+                        wastes_it->second->v_mem_avail_ - WASTES_DOMAIN_THREHOLD), 0)
                         << "Failed to set domain memory.\n";
                  }
              }
