@@ -97,6 +97,10 @@ namespace virt {
         getVCpusInfo();              
     }
 
+    float CpuInfo::getVCpusUsage() {
+        return total_vcpus_usage_;
+    }
+
     void CpuInfo::vCpuUsageInfo() {
         CHECK_GE(max_id_, 0);
         CHECK_NOTNULL(begin_params_);
@@ -109,15 +113,19 @@ namespace virt {
         LOG(INFO) << "OS Type: " << vcpu_os_type_ << std::endl;
 
         // CPU Usage
+        total_vcpus_usage_ = 0;
         for (int32_t i = 0; i < max_id_; ++i) {
             cpuDiff = (end_params_[end_nparams_ * i].value.ul -
                 begin_params_[begin_nparams_ * i].value.ul) / 1000;
             realDiff = 1000000 * (end_.tv_sec - begin_.tv_sec) +
                 (end_.tv_usec - begin_.tv_usec);
-             vCpuUsage = cpuDiff / realDiff * 100;       
+            vCpuUsage = cpuDiff / realDiff * 100;       
+            
             LOG(INFO) << "vCPU No." << i << " Usage: "
                       << std::setprecision(3) << std::fixed
                       << vCpuUsage << "%" << std::endl;
+            total_vcpus_usage_ += vCpuUsage;
         }
+        total_vcpus_usage_ /= static_cast<double>(max_id_);
     }
 }

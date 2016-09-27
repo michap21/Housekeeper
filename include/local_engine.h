@@ -10,8 +10,26 @@
 #include "vcpu_stats.h"
 #include "pcpu_stats.h"
 
-namespace virt
-{
+namespace virt {
+    #define STARVE_DOMAIN_THREHOLD  100 * 1024 * 1024   /* starvation threshold KB */
+    #define WASTES_DOMAIN_THREHOLD  300 * 1024 * 1024   /* waste threhold KB */
+
+    typedef enum {
+        VIR_MEM_STARVE = 0,
+        VIR_MEM_WASTES = 1,
+        VIR_MEM_NORMAL = 2,
+        VIR_MEM_BOTHSW = 3,
+        VIR_MEM_END
+    } vir_mem_state_t;
+
+    typedef struct {
+        double          v_cpu_usage_;        /* domain vcpus usage: % */
+        size_t          v_unused_memory_;    /* KB unused memory in domain */
+        vir_mem_state_t v_memory_state_;     /* memory state: starve, waste or both */
+
+    } vir_domain_st;
+    typedef std::unique_ptr<vir_domain_st> virDomainInfoPtr;
+
     class LocalEngine {
         public:
         DISABLE_COPY(LocalEngine);
@@ -41,7 +59,49 @@ namespace virt
                 LOG(INFO) << "###### Domain Name: "<< virDomainGetName(v_domains_[i])
                           << " ######\n";
                 CpuInfoPtr vcpu_info_ptr(new CpuInfo(v_conn_ptr_, v_domains_[i]));
-                vec_vcpu_info_[v_domains_[i]] = std::move(vcpu_info_ptr);
+                vcpu_info_ptr->vCpuUsageInfo();
+                vcpu_info_ptr->vCpuMapsInfo();
+               
+                if(m_domain_info_[v_domains_[i]] == nullptr) {
+                    virDomainInfoPtr t_domain_ptr(new vir_domain_st);
+                    m_domain_info_[v_domains_[i]] = std::move(t_domain_ptr);
+                }
+                m_domain_info_[v_domains_[i]]->v_cpu_usage_ = vcpu_info_ptr->getVCpusUsage();
+            }
+        }
+
+        void getVMemsInfo() {
+            getAllVMsList();
+            for (int32_t i = 0; i < v_domains_num_; ++i) {
+                virDomainMemoryStatStruct mem_stats[VIR_DOMAIN_MEMORY_STAT_NR];
+
+                CHECK_GE(virDomainSetMemoryStatsPeriod(v_domains_[i], 1,
+                    VIR_DOMAIN_AFFECT_LIVE | VIR_DOMAIN_AFFECT_CURRENT), 0)
+                    << "Failed to call virDomainSetMemoryStatsPeriod().\n";
+                CHECK_NE(virDomainMemoryStats(v_domains_[i], mem_stats,
+                    VIR_DOMAIN_MEMORY_STAT_NR, 0), -1)
+                    << "Failed to collect domains virt memory." << std::endl;
+                
+                LOG(INFO) << "----------Domains Memory Info Stats-----------\n";
+                LOG(INFO) << "Domain Name: "
+                          << virDomainGetName(v_domains_[i]) << std::endl;
+                
+                size_t mem_unused = mem_stats[VIR_DOMAIN_MEMORY_STAT_UNUSED].val;          
+                LOG(INFO) << "Unused Memory: " <<  mem_unused / 1024.0 << " MB\n";
+                
+                if(m_domain_info_[v_domains_[i]] == nullptr) {
+                    virDomainInfoPtr t_domain_ptr(new vir_domain_st);
+                    m_domain_info_[v_domains_[i]] = std::move(t_domain_ptr);
+                }
+                m_domain_info_[v_domains_[i]]->v_unused_memory_ = mem_unused;
+                if (mem_unused <= STARVE_DOMAIN_THREHOLD) {
+                    m_domain_info_[v_domains_[i]]->v_memory_state_ = VIR_MEM_STARVE;
+                } else if (mem_unused >= WASTES_DOMAIN_THREHOLD) {
+                    m_domain_info_[v_domains_[i]]->v_memory_state_ = VIR_MEM_WASTES;
+                } else {
+                    m_domain_info_[v_domains_[i]]->v_memory_state_ = VIR_MEM_NORMAL;
+                }         
+
             }
         }
 
@@ -64,7 +124,7 @@ namespace virt
                 v_domains_num_ = 0;
                 v_domains_ = nullptr;
             }   
-            vec_vcpu_info_.clear();
+            m_domain_info_.clear();
         }
 
         /// connect to hybervisor
@@ -92,7 +152,8 @@ namespace virt
         virConnectPtr  v_conn_ptr_;
         PCpuInfoPtr    p_cpu_ptr_;
 
-        /// VCpu info
-        std::unordered_map<virDomainPtr, CpuInfoPtr> vec_vcpu_info_;
+        /// Vir Domains Info
+        std::unordered_map<virDomainPtr, virDomainInfoPtr> m_domain_info_; 
+
     };  /// class LocalEngine
 }   /// namespace virt

@@ -4,8 +4,7 @@
 #include <libvirt/libvirt.h>
 #include "utils.h"
 
-namespace virt
-{
+namespace virt {
     class PCpuInfo {
         public:
         DISABLE_COPY(PCpuInfo);
@@ -29,7 +28,7 @@ namespace virt
         size_t getHostFrequency(){ return v_node_ptr_->mhz; }
         char*  getHostCpuModel() { return v_node_ptr_->model; }
         void   getHostCpusInfo() {
-            LOG(INFO) << "###### Host Name: "<< getHostName() << " ######\n";
+            LOG(INFO) << "---------- Host Name: "<< getHostName() << " ----------\n";
             LOG(INFO) << "CPU Model: " << getHostCpuModel() << std::endl;
             LOG(INFO) << "CPU Numbers: " << getHostCpuNum() << std::endl;
             LOG(INFO) << "CPU Frequency (Mhz): " << getHostFrequency() << std::endl;

@@ -10,13 +10,19 @@ namespace virt {
      class MemoryCoordinator : public LocalEngine {
          public:
          DISABLE_COPY(MemoryCoordinator);
-         MemoryCoordinator(const char* name = "qemu:///system") : LocalEngine(name) {}
+         MemoryCoordinator(const char* name = "qemu:///system")
+            : LocalEngine(name) {}
 
          void run(size_t timeIntervals = 10) {
             CHECK_GE(timeIntervals, 0);
             getPCpusInfo();
+            getVMemsInfo();
             sleep(timeIntervals);
          }
+
+        vir_mem_state_t getVirMemoryStates() {
+
+        } 
 
          private:
          void defaultCoordinator() {}

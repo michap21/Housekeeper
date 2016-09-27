@@ -17,8 +17,6 @@ namespace virt
         CpuInfo(virConnectPtr connPtr, virDomainPtr domainPtr)
             : vcpu_conn_ptr_(connPtr), vcpu_domain_ptr_(domainPtr){
             init();
-            vCpuUsageInfo();
-            vCpuMapsInfo();
         }
         ~CpuInfo(){
             /// free resource
@@ -28,13 +26,16 @@ namespace virt
             virTypedParamsFree(end_params_, end_nparams_ * max_id_);
         }
 
+        /// return domain vcpus usage for schedule algorithm
+        float getVCpusUsage();
+        /// stats vCpu usage
+        void  vCpuUsageInfo();
+        /// the current mao bewteen VCPU and PCPU
+        void  vCpuMapsInfo();
+
         private:
         /// initialize CpuInfo
         void init();
-        /// stats vCpu usage
-        void vCpuUsageInfo();
-        /// the current mao bewteen VCPU and PCPU
-        void vCpuMapsInfo();
         /// get vm support VCPUs num
         inline void getSupportVCPUsNum();
         /// get OS type
@@ -56,6 +57,7 @@ namespace virt
         virTypedParameterPtr end_params_;   /// param ptr for different state of vCPU
         struct timeval begin_, end_;        /// time intervals for cpu usage stats
 
+        double total_vcpus_usage_;          /// total vcpu utilization
         unsigned char  *vcpu_maps_;         /// vcpu bitmaps
         virVcpuInfoPtr  vcpu_info_ptr_;     /// vcpu info
     };
