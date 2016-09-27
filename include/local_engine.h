@@ -56,16 +56,17 @@ namespace virt {
             getAllVMsList();
             /// for each domain, query and print all needed info.
             for (int32_t i = 0; i < v_domains_num_; ++i) {
-                LOG(INFO) << "###### Domain Name: "<< virDomainGetName(v_domains_[i])
-                          << " ######\n";
+                if (m_domain_info_[v_domains_[i]] == nullptr) {
+                    virDomainInfoPtr t_domain_ptr(new vir_domain_st);
+                    m_domain_info_[v_domains_[i]] = std::move(t_domain_ptr);
+                }
+
+                LOG(INFO) << "---------- Domain Name: "<< virDomainGetName(v_domains_[i])
+                          << " ----------\n";
                 CpuInfoPtr vcpu_info_ptr(new CpuInfo(v_conn_ptr_, v_domains_[i]));
                 vcpu_info_ptr->vCpuUsageInfo();
                 vcpu_info_ptr->vCpuMapsInfo();
                
-                if(m_domain_info_[v_domains_[i]] == nullptr) {
-                    virDomainInfoPtr t_domain_ptr(new vir_domain_st);
-                    m_domain_info_[v_domains_[i]] = std::move(t_domain_ptr);
-                }
                 m_domain_info_[v_domains_[i]]->v_cpu_usage_ = vcpu_info_ptr->getVCpusUsage();
             }
         }
@@ -73,6 +74,11 @@ namespace virt {
         void getVMemsInfo() {
             getAllVMsList();
             for (int32_t i = 0; i < v_domains_num_; ++i) {
+                if (m_domain_info_[v_domains_[i]] == nullptr) {
+                    virDomainInfoPtr t_domain_ptr(new vir_domain_st);
+                    m_domain_info_[v_domains_[i]] = std::move(t_domain_ptr);
+                }
+
                 virDomainMemoryStatStruct mem_stats[VIR_DOMAIN_MEMORY_STAT_NR];
 
                 CHECK_GE(virDomainSetMemoryStatsPeriod(v_domains_[i], 1,
@@ -86,14 +92,18 @@ namespace virt {
                 LOG(INFO) << "Domain Name: "
                           << virDomainGetName(v_domains_[i]) << std::endl;
                 
-                size_t mem_unused = mem_stats[VIR_DOMAIN_MEMORY_STAT_UNUSED].val;          
-                LOG(INFO) << "Unused Memory: " <<  mem_unused / 1024.0 << " MB\n";
-                
-                if(m_domain_info_[v_domains_[i]] == nullptr) {
-                    virDomainInfoPtr t_domain_ptr(new vir_domain_st);
-                    m_domain_info_[v_domains_[i]] = std::move(t_domain_ptr);
-                }
+                size_t mem_unused = mem_stats[VIR_DOMAIN_MEMORY_STAT_UNUSED].val;
                 m_domain_info_[v_domains_[i]]->v_unused_memory_ = mem_unused;
+          
+                LOG(INFO) << "Unused Memory: " <<  mem_unused / 1024.0 << " MB\n";
+                LOG(INFO) << "Swap Out: " << mem_stats[VIR_DOMAIN_MEMORY_STAT_SWAP_OUT].val
+                          << std::endl;
+                LOG(INFO) << "Swap In: " << mem_stats[VIR_DOMAIN_MEMORY_STAT_SWAP_IN].val
+                          << std::endl;
+                LOG(INFO) << "Available: " << mem_stats[VIR_DOMAIN_MEMORY_STAT_AVAILABLE].val
+                          << std::endl;         
+                
+                
                 if (mem_unused <= STARVE_DOMAIN_THREHOLD) {
                     m_domain_info_[v_domains_[i]]->v_memory_state_ = VIR_MEM_STARVE;
                 } else if (mem_unused >= WASTES_DOMAIN_THREHOLD) {

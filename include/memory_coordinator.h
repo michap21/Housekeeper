@@ -20,10 +20,6 @@ namespace virt {
             sleep(timeIntervals);
          }
 
-        vir_mem_state_t getVirMemoryStates() {
-
-        } 
-
          private:
          void defaultCoordinator() {}
      };  // class MemoryCoordinator
