@@ -40,5 +40,5 @@ balance computing resources.
 ### Memory Coordinator
 1. Inherit from Local Engine, Memory Coordinator can query PMems and VMems information, for instance,
 Used Memory, Unused Memory, Swap in/out, etc.
-2. According to the Memory stats info, Memory Coordinato can choose the "best" scheduling algorithm to 
+2. According to the Memory stats info, Memory Coordinator can choose the "best" scheduling algorithm to 
 balance memory resources.
