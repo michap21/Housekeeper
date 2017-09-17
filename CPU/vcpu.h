@@ -8,7 +8,7 @@
 
 namespace cloud {
 
-#define USAGE_THRESHOLD   50.0
+#define USAGE_THRESHOLD 50.0
 
 class VCPU {
 public:
@@ -17,7 +17,10 @@ public:
     maplens_ = VIR_CPU_MAPLEN(maxcpus_);
   }
 
-  ~VCPU() { delete[] cpu_usage_; }
+  ~VCPU() {
+    virDomainStatsRecordListFree(records_);
+    delete[] cpu_usage_;
+  }
 
   void mapping(DomainStats *dom_stats, size_t num) {
     unsigned char maxcpus_mask = 0x1;
@@ -81,7 +84,7 @@ public:
     // the busiest CPU vcpus for the freest ones and viceversa
     for (size_t i = 0; i < num; i++) {
       cpuinfo = (virVcpuInfoPtr)calloc(stats[i].vcpus_num, sizeof(virVcpuInfo));
-      cpumaps = (unsigned char*)calloc(stats[i].vcpus_num, maplens_);
+      cpumaps = (unsigned char *)calloc(stats[i].vcpus_num, maplens_);
       virDomainGetVcpus(stats[i].domain, cpuinfo, stats[i].vcpus_num, cpumaps,
                         maplens_);
       for (size_t j = 0; j < stats[i].vcpus_num; j++) {
@@ -102,19 +105,17 @@ public:
 
   DomainStats *stats(Domains list) {
     size_t stats = VIR_DOMAIN_STATS_VCPU;
-    virDomainStatsRecordPtr *records = nullptr;
 
-    CHECK_GT(virDomainListGetStats(list.domains, stats, &records, 0), 0)
+    CHECK_GT(virDomainListGetStats(list.domains, stats, &records_, 0), 0)
         << "Could not get domains stats";
 
     DomainStats *domain_stats = new DomainStats[list.num];
 
     virDomainStatsRecordPtr *next;
     size_t i = 0;
-    for (next = records; *next; next++, i++) {
+    for (next = records_; *next; next++, i++) {
       domain_stats[i] = stats_impl(*next);
     }
-    virDomainStatsRecordListFree(records);
     return domain_stats;
   }
 
@@ -224,6 +225,7 @@ private:
 
 private:
   virConnectPtr conn_;
+  virDomainStatsRecordPtr *records_;
 
   size_t maxcpus_;
   size_t maplens_;
