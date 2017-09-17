@@ -69,12 +69,12 @@ namespace log {
                 return defaultValue;
             }
         }
-
-        static bool gLogToStderr = env2bool("PLOG_LOGTOSTDERR", true);
+ 
+        static bool gLogToStderr = env2bool("LOG_LOGTOSTDERR", true);
         static const std::vector<std::string> gLevelName = {"INFO", "WARNING", "ERROR",
             "FATAL"};
         static int gMinLogLevel =
-        env2int("PLOG_MINLOGLEVEL", env2index("PLOG_MINLOGLEVEL", gLevelName, 0));
+        env2int("LOG_MINLOGLEVEL", env2index("LOG_MINLOGLEVEL", gLevelName, 0));
 
         static std::vector<std::vector<int>> gLogFds;
         static std::vector<int> gLogFileFds;
@@ -94,7 +94,7 @@ namespace log {
                 fds.push_back(STDERR_FILENO);
             }
 
-            char* logDir = getenv("PLOG_LOGDIR");
+            char* logDir = getenv("LOG_LOGDIR");
 
             for (int i = gMinLogLevel; i < NUM_SEVERITIES && logDir != nullptr; ++i) {
                 std::string filename =
@@ -123,11 +123,11 @@ namespace log {
 
         void LogMessage::generateLogMessage() {
             if (!gLogInited) {
-                fprintf(stderr, "%c %s:%d] %s\n", "IWEF"[severity_], fname_, line_,
+                fprintf(stderr, "[%s %s:%d] %s\n", gLevelName[severity_].c_str(), fname_, line_,
                         str().c_str());
             } else {
                 for (auto& fd : gLogFds[this->severity_]) {
-                    dprintf(fd, "%c %s:%d] %s\n", "IWEF"[severity_], fname_, line_,
+                    dprintf(fd, "[%s %s:%d] %s\n", gLevelName[severity_].c_str(), fname_, line_,
                             str().c_str());
                 }
             }
