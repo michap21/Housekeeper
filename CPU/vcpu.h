@@ -35,7 +35,7 @@ public:
     for (size_t i = 0; i < num; ++i) {
       unsigned char map = 0x1;
       for (size_t j = 0; j < dom_stats[i].vcpus_num; ++j) {
-        LOG(INFO) << string::Sprintf("  - CPUmap: 0x%x", map);
+        LOG(INFO) << string::Sprintf(" - CPUmap: 0x%x", map);
         virDomainPinVcpu(dom_stats[i].domain, j, &map, maplens_);
         map <<= 0x1;
         map %= maxcpus_mask; // equivalent to map % # of pCPUs
@@ -139,11 +139,11 @@ private:
         double diff = curt[i].vcpus[j] - prev[i].vcpus[j];
         double period = (double)secs * 1000000000;
         curt[i].usage[j] = 100 * (diff / period);
-        LOG(INFO) << "  - vCPU " << j << " usage: " << curt[i].usage[j] << "%";
+        LOG(INFO) << " - vCPU " << j << " usage: " << curt[i].usage[j] << "%";
         avg_usage += curt[i].usage[j];
       }
       curt[i].avg_usage = avg_usage / curt[i].vcpus_num;
-      LOG(INFO) << "  - Average vCPU usage: " << curt[i].avg_usage << "%";
+      LOG(INFO) << " - Average vCPU usage: " << curt[i].avg_usage << "%";
     }
   }
 
@@ -168,9 +168,9 @@ private:
         cpu_usage_[cpuinfo[j].cpu] += stats[i].usage[j];
         vcpus_per_cpu_[cpuinfo[j].cpu] += 1;
 
-        LOG(INFO) << string::Sprintf("  - CPUmap: 0x%x", cpumaps[j]);
-        LOG(INFO) << string::Sprintf(" - CPU: %d", cpuinfo[j].cpu);
-        LOG(INFO) << string::Sprintf(" - vCPU %ld affinity: ", j);
+        LOG(INFO) << string::Sprintf(" - CPUmap: 0x%x", cpumaps[j]);
+                  << string::Sprintf(" - CPU: %d", cpuinfo[j].cpu);
+                  << string::Sprintf(" - vCPU %ld affinity: ", j);
 
         for (size_t m = 0; m < maxcpus_; m++) {
           printf("%c", VIR_CPU_USABLE(cpumaps, maplens_, j, m) ? 'y' : '-');
