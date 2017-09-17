@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include "log.h"
+#include "printf.h"
 #include "virt_domain.h"
 
 namespace cloud {
@@ -34,7 +35,7 @@ public:
     for (size_t i = 0; i < num; ++i) {
       unsigned char map = 0x1;
       for (size_t j = 0; j < dom_stats[i].vcpus_num; ++j) {
-        printf("  - CPUmap: 0x%x\n", map);
+        LOG(INFO) << string::Sprintf("  - CPUmap: 0x%x", map);
         virDomainPinVcpu(dom_stats[i].domain, j, &map, maplens_);
         map <<= 0x1;
         map %= maxcpus_mask; // equivalent to map % # of pCPUs
@@ -66,14 +67,14 @@ public:
     }
 
     if (do_nothing) {
-      printf("Cannot or should not change pinnings\n");
-      printf("Busiest CPU: %d - Freest CPU: %d\n", busiest, freest);
+      LOG(INFO) << string::Sprintf("Cannot or should not change pinnings");
+      LOG(INFO) << string::Sprintf("Busiest CPU: %d - Freest CPU: %d", busiest, freest);
       return;
     }
 
-    printf("Busiest CPU: %d - Freest CPU: %d\n", busiest, freest);
-    printf("Busiest CPU above usage threshold of %f%%\n", USAGE_THRESHOLD);
-    printf("Changing pinnings...\n");
+    LOG(INFO) << string::Sprintf("Busiest CPU: %d - Freest CPU: %d", busiest, freest);
+    LOG(INFO) << string::Sprintf("Busiest CPU above usage threshold of %f%%", USAGE_THRESHOLD);
+    LOG(INFO) << string::Sprintf("Changing pinnings...");
 
     virVcpuInfoPtr cpuinfo;
     unsigned char *cpumaps;
@@ -89,11 +90,11 @@ public:
                         maplens_);
       for (size_t j = 0; j < stats[i].vcpus_num; j++) {
         if (cpuinfo[j].cpu == busiest) {
-          printf("%s vCPU %ld is one of the busiest\n",
+          LOG(INFO) << string::Sprintf("%s vCPU %ld is one of the busiest\n",
                  virDomainGetName(stats[i].domain), j);
           virDomainPinVcpu(stats[i].domain, j, &freest_map, maplens_);
         } else if (cpuinfo[j].cpu == freest) {
-          printf("%s vCPU %ld is one of the freest\n",
+          LOG(INFO) << string::Sprintf("%s vCPU %ld is one of the freest\n",
                  virDomainGetName(stats[i].domain), j);
           virDomainPinVcpu(stats[i].domain, j, &busiest_map, maplens_);
         }
@@ -167,9 +168,9 @@ private:
         cpu_usage_[cpuinfo[j].cpu] += stats[i].usage[j];
         vcpus_per_cpu_[cpuinfo[j].cpu] += 1;
 
-        printf("  - CPUmap: 0x%x", cpumaps[j]);
-        printf(" - CPU: %d", cpuinfo[j].cpu);
-        printf(" - vCPU %ld affinity: ", j);
+        LOG(INFO) << string::Sprintf("  - CPUmap: 0x%x", cpumaps[j]);
+        LOG(INFO) << string::Sprintf(" - CPU: %d", cpuinfo[j].cpu);
+        LOG(INFO) << string::Sprintf(" - vCPU %ld affinity: ", j);
 
         for (size_t m = 0; m < maxcpus_; m++) {
           printf("%c", VIR_CPU_USABLE(cpumaps, maplens_, j, m) ? 'y' : '-');
@@ -185,8 +186,9 @@ private:
     for (size_t i = 0; i < maxcpus_; i++) {
       if (vcpus_per_cpu_[i] != 0) {
         cpu_usage_[i] = cpu_usage_[i] / ((double)vcpus_per_cpu_[i]);
-        printf("CPU %ld - # vCPUs assigned %d - usage %f%%\n", i,
-               vcpus_per_cpu_[i], cpu_usage_[i]);
+        LOG(INFO) << string::Sprintf(
+            "CPU %ld - # vCPUs assigned %d - usage %f%%\n", i,
+            vcpus_per_cpu_[i], cpu_usage_[i]);
       }
     }
 
