@@ -35,7 +35,7 @@ public:
     for (size_t i = 0; i < num; ++i) {
       unsigned char map = 0x1;
       for (size_t j = 0; j < dom_stats[i].vcpus_num; ++j) {
-        LOG(INFO) << string::Sprintf(" - CPUmap: 0x%x", map);
+        // LOG(INFO) << string::Sprintf(" - CPUmap: 0x%x", map);
         virDomainPinVcpu(dom_stats[i].domain, j, &map, maplens_);
         map <<= 0x1;
         map %= maxcpus_mask; // equivalent to map % # of pCPUs
@@ -168,7 +168,7 @@ private:
         cpu_usage_[cpuinfo[j].cpu] += stats[i].usage[j];
         vcpus_per_cpu_[cpuinfo[j].cpu] += 1;
 
-        LOG(INFO) << string::Sprintf(" - CPUmap: 0x%x", cpumaps[j])
+        std::cout << string::Sprintf(" - CPUmap: 0x%x", cpumaps[j])
                   << string::Sprintf(" - CPU: %d", cpuinfo[j].cpu)
                   << string::Sprintf(" - vCPU %ld affinity: ", j);
 
@@ -187,7 +187,7 @@ private:
       if (vcpus_per_cpu_[i] != 0) {
         cpu_usage_[i] = cpu_usage_[i] / ((double)vcpus_per_cpu_[i]);
         LOG(INFO) << string::Sprintf(
-            "CPU %ld - # vCPUs assigned %d - usage %f%%\n", i,
+            "CPU %ld - # vCPUs assigned %d - usage %f%%", i,
             vcpus_per_cpu_[i], cpu_usage_[i]);
       }
     }
