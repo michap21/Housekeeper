@@ -30,7 +30,7 @@ int main(int argc, const char **argv) {
 
     if (prev_num == list.num) {
       vcpu.usage(prev, curt, list.num, secs);
-      vcpu.pinning();
+      vcpu.pinning(curt, list.num);
     } else {
       vcpu.mapping(curt, list.num); // initialize vcpu2pcpu pinning
       prev = new DomainStats[list.num];
