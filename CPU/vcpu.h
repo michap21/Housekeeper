@@ -7,6 +7,9 @@
 #include "virt_domain.h"
 
 namespace cloud {
+
+#define USAGE_THRESHOLD   50.0
+
 class VCPU {
 public:
   explicit VCPU(virConnectPtr conn) : conn_(conn) {
@@ -36,7 +39,7 @@ public:
     }
   }
 
-  void pinning(DomainStats *stats, int num) {
+  void pinning(DomainStats *stats, size_t num) {
     char do_nothing = 1;
 
     int freest;
@@ -47,8 +50,8 @@ public:
 
     // Do not pin anything if all pCpus are above the threshold,
     // no room available to change pinnings
-    for (int i = 0; i < maxcpus_; i++) {
-      do_nothing &= (ucpu_usage_[i] < USAGE_THRESHOLD);
+    for (size_t i = 0; i < maxcpus_; i++) {
+      do_nothing &= (cpu_usage_[i] < USAGE_THRESHOLD);
       if (cpu_usage_[i] > busiest_usage) {
         busiest_usage = cpu_usage_[i];
         busiest = i;
@@ -76,18 +79,18 @@ public:
 
     // To do so iterate over all domains, over all vcpus and change
     // the busiest CPU vcpus for the freest ones and viceversa
-    for (int i = 0; i < num; i++) {
-      cpuinfo = calloc(stats[i].vcpus_count, sizeof(virVcpuInfo));
-      cpumaps = calloc(stats[i].vcpus_count, maplens_);
-      virDomainGetVcpus(stats[i].domain, cpuinfo, stats[i].vcpus_count, cpumaps,
+    for (size_t i = 0; i < num; i++) {
+      cpuinfo = (virVcpuInfoPtr)calloc(stats[i].vcpus_num, sizeof(virVcpuInfo));
+      cpumaps = (unsigned char*)calloc(stats[i].vcpus_num, maplens_);
+      virDomainGetVcpus(stats[i].domain, cpuinfo, stats[i].vcpus_num, cpumaps,
                         maplens_);
-      for (int j = 0; j < stats[i].vcpus_count; j++) {
+      for (size_t j = 0; j < stats[i].vcpus_num; j++) {
         if (cpuinfo[j].cpu == busiest) {
-          printf("%s vCPU %d is one of the busiest\n",
+          printf("%s vCPU %ld is one of the busiest\n",
                  virDomainGetName(stats[i].domain), j);
           virDomainPinVcpu(stats[i].domain, j, &freest_map, maplens_);
         } else if (cpuinfo[j].cpu == freest) {
-          printf("%s vCPU %d is one of the freest\n",
+          printf("%s vCPU %ld is one of the freest\n",
                  virDomainGetName(stats[i].domain), j);
           virDomainPinVcpu(stats[i].domain, j, &busiest_map, maplens_);
         }
