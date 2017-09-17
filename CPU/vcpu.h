@@ -168,8 +168,8 @@ private:
         cpu_usage_[cpuinfo[j].cpu] += stats[i].usage[j];
         vcpus_per_cpu_[cpuinfo[j].cpu] += 1;
 
-        LOG(INFO) << string::Sprintf(" - CPUmap: 0x%x", cpumaps[j]);
-                  << string::Sprintf(" - CPU: %d", cpuinfo[j].cpu);
+        LOG(INFO) << string::Sprintf(" - CPUmap: 0x%x", cpumaps[j])
+                  << string::Sprintf(" - CPU: %d", cpuinfo[j].cpu)
                   << string::Sprintf(" - vCPU %ld affinity: ", j);
 
         for (size_t m = 0; m < maxcpus_; m++) {
