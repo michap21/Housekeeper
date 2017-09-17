@@ -57,4 +57,4 @@ private:
   virConnectPtr conn_ = nullptr;
   uint64_t busy_time_ = 0;
 };
-} // namespace PCPU
+} // namespace cloud

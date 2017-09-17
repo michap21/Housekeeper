@@ -62,4 +62,4 @@ inline Domains GetActiveDomains(virConnectPtr conn) {
   return GetDomains(conn, flags);
 }
 
-} // namespace virt
+} // namespace cloud

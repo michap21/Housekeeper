@@ -95,6 +95,31 @@ public:
       }
     }
 
+    DomainStats *stats(Domains list) {
+      size_t stats = VIR_DOMAIN_STATS_VCPU;
+      virDomainStatsRecordPtr *records = nullptr;
+
+      CHECK_GT(virDomainListGetStats(list.domains, stats, &records, 0), 0)
+          << "Could not get domains stats";
+
+      DomainStats *domain_stats = new DomainStats[list.num];
+
+      virDomainStatsRecordPtr *next;
+      size_t i = 0;
+      for (next = records; *next; next++, i++) {
+        domain_stats[i] = stats_impl(*next);
+      }
+      virDomainStatsRecordListFree(records);
+      return domain_stats;
+    }
+
+    void usage(DomainStats * prev, DomainStats * curt, size_t num,
+               size_t secs) {
+      domain_dump(prev, curt, num, secs);
+      v2pmap_dump(curt, num);
+    }
+
+  private:
     void domain_dump(DomainStats * prev, DomainStats * curt, size_t num,
                      size_t secs) {
       double avg_usage;
@@ -117,7 +142,7 @@ public:
       }
     }
 
-    void v2p_dump(DomainStats * stats, size_t num) {
+    void v2pmap_dump(DomainStats * stats, size_t num) {
       size_t maxcpus = virNodeGetCPUMap(conn_, NULL, NULL, 0);
       double *cpu_usage = new double[maxcpus];
 
@@ -162,24 +187,6 @@ public:
 
       delete[] vcpus_per_cpu;
       delete[] cpu_usage;
-    }
-
-    DomainStats *stats(Domains list) {
-      size_t stats = VIR_DOMAIN_STATS_VCPU;
-      virDomainStatsRecordPtr *records = nullptr;
-
-      CHECK_GT(virDomainListGetStats(list.domains, stats, &records, 0), 0)
-          << "Could not get domains stats";
-
-      DomainStats *domain_stats = new DomainStats[list.num];
-
-      virDomainStatsRecordPtr *next;
-      size_t i = 0;
-      for (next = records; *next; next++, i++) {
-        domain_stats[i] = stats_impl(*next);
-      }
-      virDomainStatsRecordListFree(records);
-      return domain_stats;
     }
 
   private:
