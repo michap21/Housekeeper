@@ -119,7 +119,7 @@
 #include <iostream>
 #include <sstream>
 
-namespace tamimi {
+namespace cloud {
 namespace string {
 namespace tinyformat {
 
@@ -131,9 +131,8 @@ namespace tinyformat {
 namespace detail {
 
 // Test whether type T1 is convertible to type T2
-template <typename T1, typename T2>
-struct is_convertible {
- private:
+template <typename T1, typename T2> struct is_convertible {
+private:
   // two types of different size
   struct fail {
     char dummy[2];
@@ -146,7 +145,7 @@ struct is_convertible {
   static succeed tryConvert(const T2 &);
   static const T1 &makeT1();
 
- public:
+public:
   // Standard trick: the (...) version of tryConvert will be chosen from
   // the overload set only if the version taking a T2 doesn't match.
   // Then we compare the sizes of the return types to check which
@@ -163,8 +162,7 @@ struct formatValueAsType {
 };
 // Specialized version for types that can actually be converted to fmtT, as
 // indicated by the "convertible" template parameter.
-template <typename T, typename fmtT>
-struct formatValueAsType<T, fmtT, true> {
+template <typename T, typename fmtT> struct formatValueAsType<T, fmtT, true> {
   static void invoke(std::ostream &out, const T &value) {
     out << static_cast<fmtT>(value);
   }
@@ -175,15 +173,13 @@ struct formatValueAsType<T, fmtT, true> {
 template <typename T, bool convertible = is_convertible<T, int>::value>
 struct convertToInt {
   static int invoke(const T & /*value*/) {
-    TINYFORMAT_ERROR(
-        "tinyformat: Cannot convert from argument type to "
-        "integer for use as variable width or precision");
+    TINYFORMAT_ERROR("tinyformat: Cannot convert from argument type to "
+                     "integer for use as variable width or precision");
     return 0;
   }
 };
 // Specialization for convertToInt when conversion is possible
-template <typename T>
-struct convertToInt<T, true> {
+template <typename T> struct convertToInt<T, true> {
   static int invoke(const T &value) { return static_cast<int>(value); }
 };
 
@@ -196,11 +192,12 @@ inline void formatTruncated(std::ostream &out, const T &value, int ntrunc) {
   out.write(result.c_str(),
             (std::min)(ntrunc, static_cast<int>(result.size())));
 }
-#define TINYFORMAT_DEFINE_FORMAT_TRUNCATED_CSTR(type)                       \
-  inline void formatTruncated(std::ostream &out, type *value, int ntrunc) { \
-    std::streamsize len = 0;                                                \
-    while (len < ntrunc && value[len] != 0) ++len;                          \
-    out.write(value, len);                                                  \
+#define TINYFORMAT_DEFINE_FORMAT_TRUNCATED_CSTR(type)                          \
+  inline void formatTruncated(std::ostream &out, type *value, int ntrunc) {    \
+    std::streamsize len = 0;                                                   \
+    while (len < ntrunc && value[len] != 0)                                    \
+      ++len;                                                                   \
+    out.write(value, len);                                                     \
   }
 // Overload for const char* and char*.  Could overload for signed & unsigned
 // char too, but these are technically unneeded for printf compatibility.
@@ -208,7 +205,7 @@ TINYFORMAT_DEFINE_FORMAT_TRUNCATED_CSTR(const char)
 TINYFORMAT_DEFINE_FORMAT_TRUNCATED_CSTR(char)
 #undef TINYFORMAT_DEFINE_FORMAT_TRUNCATED_CSTR
 
-}  // namespace detail
+} // namespace detail
 
 //------------------------------------------------------------------------------
 // Variable formatting functions.  May be overridden for user-defined types if
@@ -249,22 +246,22 @@ inline void formatValue(std::ostream &out, const char * /*fmtBegin*/,
 }
 
 // Overloaded version for char types to support printing as an integer
-#define TINYFORMAT_DEFINE_FORMATVALUE_CHAR(charType)                      \
-  inline void formatValue(std::ostream &out, const char * /*fmtBegin*/,   \
-                          const char *fmtEnd, int /**/, charType value) { \
-    switch (*(fmtEnd - 1)) {                                              \
-      case 'u':                                                           \
-      case 'd':                                                           \
-      case 'i':                                                           \
-      case 'o':                                                           \
-      case 'X':                                                           \
-      case 'x':                                                           \
-        out << static_cast<int>(value);                                   \
-        break;                                                            \
-      default:                                                            \
-        out << value;                                                     \
-        break;                                                            \
-    }                                                                     \
+#define TINYFORMAT_DEFINE_FORMATVALUE_CHAR(charType)                           \
+  inline void formatValue(std::ostream &out, const char * /*fmtBegin*/,        \
+                          const char *fmtEnd, int /**/, charType value) {      \
+    switch (*(fmtEnd - 1)) {                                                   \
+    case 'u':                                                                  \
+    case 'd':                                                                  \
+    case 'i':                                                                  \
+    case 'o':                                                                  \
+    case 'X':                                                                  \
+    case 'x':                                                                  \
+      out << static_cast<int>(value);                                          \
+      break;                                                                   \
+    default:                                                                   \
+      out << value;                                                            \
+      break;                                                                   \
+    }                                                                          \
   }
 // per 3.9.1: char, signed char and unsigned char are all distinct types
 TINYFORMAT_DEFINE_FORMATVALUE_CHAR(char)
@@ -323,87 +320,87 @@ cog.outl('#define TINYFORMAT_FOREACH_ARGNUM(m) \\\n    ' +
 #define TINYFORMAT_ARGTYPES_3 class T1, class T2, class T3
 #define TINYFORMAT_ARGTYPES_4 class T1, class T2, class T3, class T4
 #define TINYFORMAT_ARGTYPES_5 class T1, class T2, class T3, class T4, class T5
-#define TINYFORMAT_ARGTYPES_6 \
+#define TINYFORMAT_ARGTYPES_6                                                  \
   class T1, class T2, class T3, class T4, class T5, class T6
-#define TINYFORMAT_ARGTYPES_7 \
+#define TINYFORMAT_ARGTYPES_7                                                  \
   class T1, class T2, class T3, class T4, class T5, class T6, class T7
-#define TINYFORMAT_ARGTYPES_8 \
+#define TINYFORMAT_ARGTYPES_8                                                  \
   class T1, class T2, class T3, class T4, class T5, class T6, class T7, class T8
-#define TINYFORMAT_ARGTYPES_9                                           \
-  class T1, class T2, class T3, class T4, class T5, class T6, class T7, \
+#define TINYFORMAT_ARGTYPES_9                                                  \
+  class T1, class T2, class T3, class T4, class T5, class T6, class T7,        \
       class T8, class T9
-#define TINYFORMAT_ARGTYPES_10                                          \
-  class T1, class T2, class T3, class T4, class T5, class T6, class T7, \
+#define TINYFORMAT_ARGTYPES_10                                                 \
+  class T1, class T2, class T3, class T4, class T5, class T6, class T7,        \
       class T8, class T9, class T10
-#define TINYFORMAT_ARGTYPES_11                                          \
-  class T1, class T2, class T3, class T4, class T5, class T6, class T7, \
+#define TINYFORMAT_ARGTYPES_11                                                 \
+  class T1, class T2, class T3, class T4, class T5, class T6, class T7,        \
       class T8, class T9, class T10, class T11
-#define TINYFORMAT_ARGTYPES_12                                          \
-  class T1, class T2, class T3, class T4, class T5, class T6, class T7, \
+#define TINYFORMAT_ARGTYPES_12                                                 \
+  class T1, class T2, class T3, class T4, class T5, class T6, class T7,        \
       class T8, class T9, class T10, class T11, class T12
-#define TINYFORMAT_ARGTYPES_13                                          \
-  class T1, class T2, class T3, class T4, class T5, class T6, class T7, \
+#define TINYFORMAT_ARGTYPES_13                                                 \
+  class T1, class T2, class T3, class T4, class T5, class T6, class T7,        \
       class T8, class T9, class T10, class T11, class T12, class T13
-#define TINYFORMAT_ARGTYPES_14                                          \
-  class T1, class T2, class T3, class T4, class T5, class T6, class T7, \
-      class T8, class T9, class T10, class T11, class T12, class T13,   \
+#define TINYFORMAT_ARGTYPES_14                                                 \
+  class T1, class T2, class T3, class T4, class T5, class T6, class T7,        \
+      class T8, class T9, class T10, class T11, class T12, class T13,          \
       class T14
-#define TINYFORMAT_ARGTYPES_15                                          \
-  class T1, class T2, class T3, class T4, class T5, class T6, class T7, \
-      class T8, class T9, class T10, class T11, class T12, class T13,   \
+#define TINYFORMAT_ARGTYPES_15                                                 \
+  class T1, class T2, class T3, class T4, class T5, class T6, class T7,        \
+      class T8, class T9, class T10, class T11, class T12, class T13,          \
       class T14, class T15
-#define TINYFORMAT_ARGTYPES_16                                          \
-  class T1, class T2, class T3, class T4, class T5, class T6, class T7, \
-      class T8, class T9, class T10, class T11, class T12, class T13,   \
+#define TINYFORMAT_ARGTYPES_16                                                 \
+  class T1, class T2, class T3, class T4, class T5, class T6, class T7,        \
+      class T8, class T9, class T10, class T11, class T12, class T13,          \
       class T14, class T15, class T16
 
 #define TINYFORMAT_VARARGS_1 const T1 &v1
 #define TINYFORMAT_VARARGS_2 const T1 &v1, const T2 &v2
 #define TINYFORMAT_VARARGS_3 const T1 &v1, const T2 &v2, const T3 &v3
-#define TINYFORMAT_VARARGS_4 \
+#define TINYFORMAT_VARARGS_4                                                   \
   const T1 &v1, const T2 &v2, const T3 &v3, const T4 &v4
-#define TINYFORMAT_VARARGS_5 \
+#define TINYFORMAT_VARARGS_5                                                   \
   const T1 &v1, const T2 &v2, const T3 &v3, const T4 &v4, const T5 &v5
-#define TINYFORMAT_VARARGS_6                                            \
-  const T1 &v1, const T2 &v2, const T3 &v3, const T4 &v4, const T5 &v5, \
+#define TINYFORMAT_VARARGS_6                                                   \
+  const T1 &v1, const T2 &v2, const T3 &v3, const T4 &v4, const T5 &v5,        \
       const T6 &v6
-#define TINYFORMAT_VARARGS_7                                            \
-  const T1 &v1, const T2 &v2, const T3 &v3, const T4 &v4, const T5 &v5, \
+#define TINYFORMAT_VARARGS_7                                                   \
+  const T1 &v1, const T2 &v2, const T3 &v3, const T4 &v4, const T5 &v5,        \
       const T6 &v6, const T7 &v7
-#define TINYFORMAT_VARARGS_8                                            \
-  const T1 &v1, const T2 &v2, const T3 &v3, const T4 &v4, const T5 &v5, \
+#define TINYFORMAT_VARARGS_8                                                   \
+  const T1 &v1, const T2 &v2, const T3 &v3, const T4 &v4, const T5 &v5,        \
       const T6 &v6, const T7 &v7, const T8 &v8
-#define TINYFORMAT_VARARGS_9                                            \
-  const T1 &v1, const T2 &v2, const T3 &v3, const T4 &v4, const T5 &v5, \
+#define TINYFORMAT_VARARGS_9                                                   \
+  const T1 &v1, const T2 &v2, const T3 &v3, const T4 &v4, const T5 &v5,        \
       const T6 &v6, const T7 &v7, const T8 &v8, const T9 &v9
-#define TINYFORMAT_VARARGS_10                                           \
-  const T1 &v1, const T2 &v2, const T3 &v3, const T4 &v4, const T5 &v5, \
+#define TINYFORMAT_VARARGS_10                                                  \
+  const T1 &v1, const T2 &v2, const T3 &v3, const T4 &v4, const T5 &v5,        \
       const T6 &v6, const T7 &v7, const T8 &v8, const T9 &v9, const T10 &v10
-#define TINYFORMAT_VARARGS_11                                                 \
-  const T1 &v1, const T2 &v2, const T3 &v3, const T4 &v4, const T5 &v5,       \
-      const T6 &v6, const T7 &v7, const T8 &v8, const T9 &v9, const T10 &v10, \
+#define TINYFORMAT_VARARGS_11                                                  \
+  const T1 &v1, const T2 &v2, const T3 &v3, const T4 &v4, const T5 &v5,        \
+      const T6 &v6, const T7 &v7, const T8 &v8, const T9 &v9, const T10 &v10,  \
       const T11 &v11
-#define TINYFORMAT_VARARGS_12                                                 \
-  const T1 &v1, const T2 &v2, const T3 &v3, const T4 &v4, const T5 &v5,       \
-      const T6 &v6, const T7 &v7, const T8 &v8, const T9 &v9, const T10 &v10, \
+#define TINYFORMAT_VARARGS_12                                                  \
+  const T1 &v1, const T2 &v2, const T3 &v3, const T4 &v4, const T5 &v5,        \
+      const T6 &v6, const T7 &v7, const T8 &v8, const T9 &v9, const T10 &v10,  \
       const T11 &v11, const T12 &v12
-#define TINYFORMAT_VARARGS_13                                                 \
-  const T1 &v1, const T2 &v2, const T3 &v3, const T4 &v4, const T5 &v5,       \
-      const T6 &v6, const T7 &v7, const T8 &v8, const T9 &v9, const T10 &v10, \
+#define TINYFORMAT_VARARGS_13                                                  \
+  const T1 &v1, const T2 &v2, const T3 &v3, const T4 &v4, const T5 &v5,        \
+      const T6 &v6, const T7 &v7, const T8 &v8, const T9 &v9, const T10 &v10,  \
       const T11 &v11, const T12 &v12, const T13 &v13
-#define TINYFORMAT_VARARGS_14                                                 \
-  const T1 &v1, const T2 &v2, const T3 &v3, const T4 &v4, const T5 &v5,       \
-      const T6 &v6, const T7 &v7, const T8 &v8, const T9 &v9, const T10 &v10, \
+#define TINYFORMAT_VARARGS_14                                                  \
+  const T1 &v1, const T2 &v2, const T3 &v3, const T4 &v4, const T5 &v5,        \
+      const T6 &v6, const T7 &v7, const T8 &v8, const T9 &v9, const T10 &v10,  \
       const T11 &v11, const T12 &v12, const T13 &v13, const T14 &v14
-#define TINYFORMAT_VARARGS_15                                                 \
-  const T1 &v1, const T2 &v2, const T3 &v3, const T4 &v4, const T5 &v5,       \
-      const T6 &v6, const T7 &v7, const T8 &v8, const T9 &v9, const T10 &v10, \
-      const T11 &v11, const T12 &v12, const T13 &v13, const T14 &v14,         \
+#define TINYFORMAT_VARARGS_15                                                  \
+  const T1 &v1, const T2 &v2, const T3 &v3, const T4 &v4, const T5 &v5,        \
+      const T6 &v6, const T7 &v7, const T8 &v8, const T9 &v9, const T10 &v10,  \
+      const T11 &v11, const T12 &v12, const T13 &v13, const T14 &v14,          \
       const T15 &v15
-#define TINYFORMAT_VARARGS_16                                                 \
-  const T1 &v1, const T2 &v2, const T3 &v3, const T4 &v4, const T5 &v5,       \
-      const T6 &v6, const T7 &v7, const T8 &v8, const T9 &v9, const T10 &v10, \
-      const T11 &v11, const T12 &v12, const T13 &v13, const T14 &v14,         \
+#define TINYFORMAT_VARARGS_16                                                  \
+  const T1 &v1, const T2 &v2, const T3 &v3, const T4 &v4, const T5 &v5,        \
+      const T6 &v6, const T7 &v7, const T8 &v8, const T9 &v9, const T10 &v10,  \
+      const T11 &v11, const T12 &v12, const T13 &v13, const T14 &v14,          \
       const T15 &v15, const T16 &v16
 
 #define TINYFORMAT_PASSARGS_1 v1
@@ -418,13 +415,13 @@ cog.outl('#define TINYFORMAT_FOREACH_ARGNUM(m) \\\n    ' +
 #define TINYFORMAT_PASSARGS_10 v1, v2, v3, v4, v5, v6, v7, v8, v9, v10
 #define TINYFORMAT_PASSARGS_11 v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11
 #define TINYFORMAT_PASSARGS_12 v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12
-#define TINYFORMAT_PASSARGS_13 \
+#define TINYFORMAT_PASSARGS_13                                                 \
   v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13
-#define TINYFORMAT_PASSARGS_14 \
+#define TINYFORMAT_PASSARGS_14                                                 \
   v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14
-#define TINYFORMAT_PASSARGS_15 \
+#define TINYFORMAT_PASSARGS_15                                                 \
   v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15
-#define TINYFORMAT_PASSARGS_16 \
+#define TINYFORMAT_PASSARGS_16                                                 \
   v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16
 
 #define TINYFORMAT_PASSARGS_TAIL_1
@@ -438,19 +435,19 @@ cog.outl('#define TINYFORMAT_FOREACH_ARGNUM(m) \\\n    ' +
 #define TINYFORMAT_PASSARGS_TAIL_9 , v2, v3, v4, v5, v6, v7, v8, v9
 #define TINYFORMAT_PASSARGS_TAIL_10 , v2, v3, v4, v5, v6, v7, v8, v9, v10
 #define TINYFORMAT_PASSARGS_TAIL_11 , v2, v3, v4, v5, v6, v7, v8, v9, v10, v11
-#define TINYFORMAT_PASSARGS_TAIL_12 \
+#define TINYFORMAT_PASSARGS_TAIL_12                                            \
   , v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12
-#define TINYFORMAT_PASSARGS_TAIL_13 \
+#define TINYFORMAT_PASSARGS_TAIL_13                                            \
   , v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13
-#define TINYFORMAT_PASSARGS_TAIL_14 \
+#define TINYFORMAT_PASSARGS_TAIL_14                                            \
   , v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14
-#define TINYFORMAT_PASSARGS_TAIL_15 \
+#define TINYFORMAT_PASSARGS_TAIL_15                                            \
   , v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15
-#define TINYFORMAT_PASSARGS_TAIL_16 \
+#define TINYFORMAT_PASSARGS_TAIL_16                                            \
   , v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16
 
-#define TINYFORMAT_FOREACH_ARGNUM(m)                                         \
-  m(1) m(2) m(3) m(4) m(5) m(6) m(7) m(8) m(9) m(10) m(11) m(12) m(13) m(14) \
+#define TINYFORMAT_FOREACH_ARGNUM(m)                                           \
+  m(1) m(2) m(3) m(4) m(5) m(6) m(7) m(8) m(9) m(10) m(11) m(12) m(13) m(14)   \
       m(15) m(16)
 //[[[end]]]
 
@@ -461,14 +458,13 @@ namespace detail {
 // each argument to be allocated as a homogenous array inside FormatList
 // whereas a naive implementation based on inheritance does not.
 class FormatArg {
- public:
+public:
   FormatArg() {}
 
   template <typename T>
   FormatArg(const T &value)
       : m_value(static_cast<const void *>(&value)),
-        m_formatImpl(&formatImpl<T>),
-        m_toIntImpl(&toIntImpl<T>) {}
+        m_formatImpl(&formatImpl<T>), m_toIntImpl(&toIntImpl<T>) {}
 
   void format(std::ostream &out, const char *fmtBegin, const char *fmtEnd,
               int ntrunc) const {
@@ -477,15 +473,14 @@ class FormatArg {
 
   int toInt() const { return m_toIntImpl(m_value); }
 
- private:
+private:
   template <typename T>
   static void formatImpl(std::ostream &out, const char *fmtBegin,
                          const char *fmtEnd, int ntrunc, const void *value) {
     formatValue(out, fmtBegin, fmtEnd, ntrunc, *static_cast<const T *>(value));
   }
 
-  template <typename T>
-  static int toIntImpl(const void *value) {
+  template <typename T> static int toIntImpl(const void *value) {
     return convertToInt<T>::invoke(*static_cast<const T *>(value));
   }
 
@@ -499,7 +494,8 @@ class FormatArg {
 // On return, c is set to one past the end of the integer.
 inline int parseIntAndAdvance(const char *&c) {
   int i = 0;
-  for (; *c >= '0' && *c <= '9'; ++c) i = 10 * i + (*c - '0');
+  for (; *c >= '0' && *c <= '9'; ++c)
+    i = 10 * i + (*c - '0');
   return i;
 }
 
@@ -514,17 +510,18 @@ inline const char *printFormatStringLiteral(std::ostream &out,
   const char *c = fmt;
   for (;; ++c) {
     switch (*c) {
-      case '\0':
-        out.write(fmt, c - fmt);
+    case '\0':
+      out.write(fmt, c - fmt);
+      return c;
+    case '%':
+      out.write(fmt, c - fmt);
+      if (*(c + 1) != '%')
         return c;
-      case '%':
-        out.write(fmt, c - fmt);
-        if (*(c + 1) != '%') return c;
-        // for "%%", tack trailing % onto next literal section.
-        fmt = ++c;
-        break;
-      default:
-        break;
+      // for "%%", tack trailing % onto next literal section.
+      fmt = ++c;
+      break;
+    default:
+      break;
     }
   }
 }
@@ -564,33 +561,34 @@ inline const char *streamStateFromFormat(std::ostream &out,
   // 1) Parse flags
   for (;; ++c) {
     switch (*c) {
-      case '#':
-        out.setf(std::ios::showpoint | std::ios::showbase);
-        continue;
-      case '0':
-        // overridden by left alignment ('-' flag)
-        if (!(out.flags() & std::ios::left)) {
-          // Use internal padding so that numeric values are
-          // formatted correctly, eg -00010 rather than 000-10
-          out.fill('0');
-          out.setf(std::ios::internal, std::ios::adjustfield);
-        }
-        continue;
-      case '-':
-        out.fill(' ');
-        out.setf(std::ios::left, std::ios::adjustfield);
-        continue;
-      case ' ':
-        // overridden by show positive sign, '+' flag.
-        if (!(out.flags() & std::ios::showpos)) spacePadPositive = true;
-        continue;
-      case '+':
-        out.setf(std::ios::showpos);
-        spacePadPositive = false;
-        widthExtra = 1;
-        continue;
-      default:
-        break;
+    case '#':
+      out.setf(std::ios::showpoint | std::ios::showbase);
+      continue;
+    case '0':
+      // overridden by left alignment ('-' flag)
+      if (!(out.flags() & std::ios::left)) {
+        // Use internal padding so that numeric values are
+        // formatted correctly, eg -00010 rather than 000-10
+        out.fill('0');
+        out.setf(std::ios::internal, std::ios::adjustfield);
+      }
+      continue;
+    case '-':
+      out.fill(' ');
+      out.setf(std::ios::left, std::ios::adjustfield);
+      continue;
+    case ' ':
+      // overridden by show positive sign, '+' flag.
+      if (!(out.flags() & std::ios::showpos))
+        spacePadPositive = true;
+      continue;
+    case '+':
+      out.setf(std::ios::showpos);
+      spacePadPositive = false;
+      widthExtra = 1;
+      continue;
+    default:
+      break;
     }
     break;
   }
@@ -630,7 +628,7 @@ inline const char *streamStateFromFormat(std::ostream &out,
     } else {
       if (*c >= '0' && *c <= '9')
         precision = parseIntAndAdvance(c);
-      else if (*c == '-')  // negative precisions ignored, treated as zero.
+      else if (*c == '-') // negative precisions ignored, treated as zero.
         parseIntAndAdvance(++c);
     }
     out.precision(precision);
@@ -645,66 +643,65 @@ inline const char *streamStateFromFormat(std::ostream &out,
   // boost::format class for forging the way here).
   bool intConversion = false;
   switch (*c) {
-    case 'u':
-    case 'd':
-    case 'i':
-      out.setf(std::ios::dec, std::ios::basefield);
-      intConversion = true;
-      break;
-    case 'o':
-      out.setf(std::ios::oct, std::ios::basefield);
-      intConversion = true;
-      break;
-    case 'X':
-      out.setf(std::ios::uppercase);
-    case 'x':
-    case 'p':
-      out.setf(std::ios::hex, std::ios::basefield);
-      intConversion = true;
-      break;
-    case 'E':
-      out.setf(std::ios::uppercase);
-    case 'e':
-      out.setf(std::ios::scientific, std::ios::floatfield);
-      out.setf(std::ios::dec, std::ios::basefield);
-      break;
-    case 'F':
-      out.setf(std::ios::uppercase);
-    case 'f':
-      out.setf(std::ios::fixed, std::ios::floatfield);
-      break;
-    case 'G':
-      out.setf(std::ios::uppercase);
-    case 'g':
-      out.setf(std::ios::dec, std::ios::basefield);
-      // As in boost::format, let stream decide float format.
-      out.flags(out.flags() & ~std::ios::floatfield);
-      break;
-    case 'a':
-    case 'A':
-      TINYFORMAT_ERROR(
-          "tinyformat: the %a and %A conversion specs "
-          "are not supported");
-      break;
-    case 'c':
-      // Handled as special case inside formatValue()
-      break;
-    case 's':
-      if (precisionSet) ntrunc = static_cast<int>(out.precision());
-      // Make %s print booleans as "true" and "false"
-      out.setf(std::ios::boolalpha);
-      break;
-    case 'n':
-      // Not supported - will cause problems!
-      TINYFORMAT_ERROR("tinyformat: %n conversion spec not supported");
-      break;
-    case '\0':
-      TINYFORMAT_ERROR(
-          "tinyformat: Conversion spec incorrectly "
-          "terminated by end of string");
-      return c;
-    default:
-      break;
+  case 'u':
+  case 'd':
+  case 'i':
+    out.setf(std::ios::dec, std::ios::basefield);
+    intConversion = true;
+    break;
+  case 'o':
+    out.setf(std::ios::oct, std::ios::basefield);
+    intConversion = true;
+    break;
+  case 'X':
+    out.setf(std::ios::uppercase);
+  case 'x':
+  case 'p':
+    out.setf(std::ios::hex, std::ios::basefield);
+    intConversion = true;
+    break;
+  case 'E':
+    out.setf(std::ios::uppercase);
+  case 'e':
+    out.setf(std::ios::scientific, std::ios::floatfield);
+    out.setf(std::ios::dec, std::ios::basefield);
+    break;
+  case 'F':
+    out.setf(std::ios::uppercase);
+  case 'f':
+    out.setf(std::ios::fixed, std::ios::floatfield);
+    break;
+  case 'G':
+    out.setf(std::ios::uppercase);
+  case 'g':
+    out.setf(std::ios::dec, std::ios::basefield);
+    // As in boost::format, let stream decide float format.
+    out.flags(out.flags() & ~std::ios::floatfield);
+    break;
+  case 'a':
+  case 'A':
+    TINYFORMAT_ERROR("tinyformat: the %a and %A conversion specs "
+                     "are not supported");
+    break;
+  case 'c':
+    // Handled as special case inside formatValue()
+    break;
+  case 's':
+    if (precisionSet)
+      ntrunc = static_cast<int>(out.precision());
+    // Make %s print booleans as "true" and "false"
+    out.setf(std::ios::boolalpha);
+    break;
+  case 'n':
+    // Not supported - will cause problems!
+    TINYFORMAT_ERROR("tinyformat: %n conversion spec not supported");
+    break;
+  case '\0':
+    TINYFORMAT_ERROR("tinyformat: Conversion spec incorrectly "
+                     "terminated by end of string");
+    return c;
+  default:
+    break;
   }
   if (intConversion && precisionSet && !widthSet) {
     // "precision" for integers gives the minimum number of digits (to be
@@ -753,9 +750,10 @@ inline void formatImpl(std::ostream &out, const char *fmt,
       tmpStream.copyfmt(out);
       tmpStream.setf(std::ios::showpos);
       arg.format(tmpStream, fmt, fmtEnd, ntrunc);
-      std::string result = tmpStream.str();  // allocates... yuck.
+      std::string result = tmpStream.str(); // allocates... yuck.
       for (size_t i = 0, iend = result.size(); i < iend; ++i)
-        if (result[i] == '+') result[i] = ' ';
+        if (result[i] == '+')
+          result[i] = ' ';
       out << result;
     }
     fmt = fmtEnd;
@@ -774,7 +772,7 @@ inline void formatImpl(std::ostream &out, const char *fmt,
   out.fill(origFill);
 }
 
-}  // namespace detail
+} // namespace detail
 
 /// List of template arguments format(), held in a type-opaque way.
 ///
@@ -783,14 +781,14 @@ inline void formatImpl(std::ostream &out, const char *fmt,
 /// information has been stripped from the arguments, leaving just enough of a
 /// common interface to perform formatting as required.
 class FormatList {
- public:
+public:
   FormatList(detail::FormatArg *formatters, int N)
       : m_formatters(formatters), m_N(N) {}
 
   friend void vformat(std::ostream &out, const char *fmt,
                       const FormatList &list);
 
- private:
+private:
   const detail::FormatArg *m_formatters;
   int m_N;
 };
@@ -801,9 +799,8 @@ typedef const FormatList &FormatListRef;
 namespace detail {
 
 // Format list subclass with fixed storage to avoid dynamic allocation
-template <int N>
-class FormatListN : public FormatList {
- public:
+template <int N> class FormatListN : public FormatList {
+public:
   template <typename... Args>
   FormatListN(const Args &... args)
       : FormatList(&m_formatterStore[0], N),
@@ -811,18 +808,17 @@ class FormatListN : public FormatList {
     static_assert(sizeof...(args) == N, "Number of args must be N");
   }
 
- private:
+private:
   FormatArg m_formatterStore[N];
 };
 
 // Special 0-arg version - MSVC says zero-sized C array in struct is nonstandard
-template <>
-class FormatListN<0> : public FormatList {
- public:
+template <> class FormatListN<0> : public FormatList {
+public:
   FormatListN() : FormatList(0, 0) {}
 };
 
-}  // namespace detail
+} // namespace detail
 
 //------------------------------------------------------------------------------
 // Primary API functions
@@ -862,8 +858,7 @@ std::string format(const char *fmt, const Args &... args) {
 }
 
 /// Format list of arguments to std::cout, according to the given format string
-template <typename... Args>
-void printf(const char *fmt, const Args &... args) {
+template <typename... Args> void printf(const char *fmt, const Args &... args) {
   format(std::cout, fmt, args...);
 }
 
@@ -873,6 +868,6 @@ void printfln(const char *fmt, const Args &... args) {
   std::cout << '\n';
 }
 
-}  // namespace tinyformat
-}  // namespace string
-}  // namespace tamimi
+} // namespace tinyformat
+} // namespace string
+} // namespace cloud

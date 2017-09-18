@@ -6,7 +6,7 @@
 using namespace cloud;
 
 int main(int argc, const char **argv) {
-  log::initializeLogging(argc, argv);
+  logger::initializeLogging(argc, argv);
 
   CHECK_EQ(argc, 2) << "Please provide one argument time internal (sec): "
                        "./bin/vcpu_scheduler 12";

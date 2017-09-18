@@ -4,10 +4,13 @@
 #include <sstream>
 #include <string>
 
-#define _LOG_INFO ::log::internal::LogMessage(log::INFO, __FILE__, __LINE__)
-#define _LOG_WARNING ::log::internal::LogMessage(log::WARNING, __FILE__, __LINE__)
-#define _LOG_ERROR ::log::internal::LogMessage(log::ERROR, __FILE__, __LINE__)
-#define _LOG_FATAL ::log::internal::LogMessageFatal(__FILE__, __LINE__)
+#define _LOG_INFO                                                              \
+  ::logger::internal::LogMessage(logger::INFO, __FILE__, __LINE__)
+#define _LOG_WARNING                                                           \
+  ::logger::internal::LogMessage(logger::WARNING, __FILE__, __LINE__)
+#define _LOG_ERROR                                                             \
+  ::logger::internal::LogMessage(logger::ERROR, __FILE__, __LINE__)
+#define _LOG_FATAL ::logger::internal::LogMessageFatal(__FILE__, __LINE__)
 
 #define LOG(severity) _LOG_##severity
 
@@ -63,7 +66,7 @@
 #define CHECK_GT(val1, val2) CHECK((val1) > (val2))
 #define CHECK_NOTNULL(val) CHECK((val) != nullptr)
 
-namespace log {
+namespace logger {
 
 //! Log levels.
 const int INFO = 0;
@@ -134,4 +137,4 @@ inline void installFailureWriter(void (*callback)(const char *, int)) {
   (void)(callback); // unused callback.
 }
 } //  namespace logging
-} //  namespace log
+} //  namespace logger
