@@ -55,29 +55,28 @@
 
 #pragma once
 
+#include "tinyformat.h" // https://github.com/c42f/tinyformat
 #include <iostream>
 #include <sstream>
-#include "tinyformat.h"  // https://github.com/c42f/tinyformat
 
 namespace cloud {
 namespace string {
 
 template <typename... Args>
-void Fprintf(std::ostream& out, const char* fmt, const Args&... args) {
+void Fprintf(std::ostream &out, const char *fmt, const Args &... args) {
   tinyformat::vformat(out, fmt, tinyformat::makeFormatList(args...));
 }
 
 template <typename... Args>
-std::string Sprintf(const char* fmt, const Args&... args) {
+std::string Sprintf(const char *fmt, const Args &... args) {
   std::ostringstream oss;
   Fprintf(oss, fmt, args...);
   return oss.str();
 }
 
-template <typename... Args>
-void Printf(const char* fmt, const Args&... args) {
+template <typename... Args> void Printf(const char *fmt, const Args &... args) {
   Fprintf(std::cout, fmt, args...);
 }
 
-}  // namespace string
-}  // namespace cloud
+} // namespace string
+} // namespace cloud

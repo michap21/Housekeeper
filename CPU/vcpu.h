@@ -5,7 +5,7 @@
 
 #include "log.h"
 #include "printf.h"
-#include "virt_domain.h"
+#include "domain.h"
 
 namespace cloud {
 

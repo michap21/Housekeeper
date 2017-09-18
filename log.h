@@ -5,7 +5,8 @@
 #include <string>
 
 #define _LOG_INFO ::log::internal::LogMessage(log::INFO, __FILE__, __LINE__)
-#define _LOG_WARNING ::log::internal::LogMessage(log::WARNING, __FILE__, __LINE__)
+#define _LOG_WARNING                                                           \
+  ::log::internal::LogMessage(log::WARNING, __FILE__, __LINE__)
 #define _LOG_ERROR ::log::internal::LogMessage(log::ERROR, __FILE__, __LINE__)
 #define _LOG_FATAL ::log::internal::LogMessageFatal(__FILE__, __LINE__)
 
