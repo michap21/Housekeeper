@@ -4,7 +4,7 @@
 #include <unistd.h>
 
 #include "log.h"
-#include "virt_domain.h"
+#include "domain.h"
 
 namespace cloud {
 

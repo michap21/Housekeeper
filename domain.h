@@ -6,18 +6,34 @@
 
 namespace cloud {
 
+/**
+ * starved memory if below threshold
+ */
+#define STARVE_THRESHOLD (150 * 1024)
+
+/**
+ * wasted  memory if above threshold
+ */
+#define WASTED_THRESHOLD (300 * 1024)
+
 /* clang-format off */
 struct Domains {
   size_t        num;        /* Number of domains in the *domains array */
   virDomainPtr *domains;    /* Pointer to array of Libvirt domains */
 };
 
+/* (TODO: gangliao) using unordered_map */
 struct DomainStats {
   virDomainPtr  domain;     /* The pointer to domian */
   size_t        vcpus_num;  /* The number of virtual CPUS */
   uint64_t     *vcpus;      /* The pointer to all virtual CPUs in this domain */
   double       *usage;      /* The Pointer to usage of all virtual CPUs in this domain */
   double        avg_usage;  /* The average usage of virtual CPUs in this domain */
+};
+
+struct DomainMemory {
+  virDomainPtr domain;      /* The pointer to domain */
+  uint64_t     size;        /* The size of domain memory */
 };
 /* clang-format on */
 
