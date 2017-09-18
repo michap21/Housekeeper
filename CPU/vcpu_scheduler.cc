@@ -1,21 +1,24 @@
 #include "vcpu.h"
+#include "domain.h"
 #include "log.h"
 #include "pcpu.h"
-#include "domain.h"
 
 using namespace cloud;
 
 int main(int argc, const char **argv) {
   logger::initializeLogging(argc, argv);
 
-  CHECK_EQ(argc, 2) << "ERROR: Please provide one argument time internal (sec): "
-                       "for instance, ./bin/vcpu_scheduler 12";
+  CHECK_EQ(argc, 2)
+      << "ERROR: Please provide one argument time internal (sec): "
+         "for instance, ./bin/vcpu_scheduler 12";
 
   auto secs = atoi(argv[1]);
   auto conn = LocalConnect();
 
-  LOG(INFO) << string::Sprintf("- vCPU Scheduler - Interval: %s seconds", argv[1]);
-  LOG(INFO) << string::Sprintf("Connecting to Libvirt ... Connected Successfully!");
+  LOG(INFO) << string::Sprintf("- vCPU Scheduler - Interval: %s seconds",
+                               argv[1]);
+  LOG(INFO) << string::Sprintf(
+      "Connecting to Libvirt ... Connected Successfully!");
 
   PCPU pcpu(conn);
   VCPU vcpu(conn);

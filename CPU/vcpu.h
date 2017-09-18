@@ -3,9 +3,9 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "domain.h"
 #include "log.h"
 #include "printf.h"
-#include "domain.h"
 
 namespace cloud {
 
@@ -68,12 +68,15 @@ public:
 
     if (do_nothing) {
       LOG(INFO) << string::Sprintf("Cannot or should not change pinnings");
-      LOG(INFO) << string::Sprintf("Busiest CPU: %d - Freest CPU: %d", busiest, freest);
+      LOG(INFO) << string::Sprintf("Busiest CPU: %d - Freest CPU: %d", busiest,
+                                   freest);
       return;
     }
 
-    LOG(INFO) << string::Sprintf("Busiest CPU: %d - Freest CPU: %d", busiest, freest);
-    LOG(INFO) << string::Sprintf("Busiest CPU above usage threshold of %f%%", USAGE_THRESHOLD);
+    LOG(INFO) << string::Sprintf("Busiest CPU: %d - Freest CPU: %d", busiest,
+                                 freest);
+    LOG(INFO) << string::Sprintf("Busiest CPU above usage threshold of %f%%",
+                                 USAGE_THRESHOLD);
     LOG(INFO) << string::Sprintf("Changing pinnings...");
 
     virVcpuInfoPtr cpuinfo;
@@ -91,11 +94,11 @@ public:
       for (size_t j = 0; j < stats[i].vcpus_num; j++) {
         if (cpuinfo[j].cpu == busiest) {
           LOG(INFO) << string::Sprintf("%s vCPU %ld is one of the busiest\n",
-                 virDomainGetName(stats[i].domain), j);
+                                       virDomainGetName(stats[i].domain), j);
           virDomainPinVcpu(stats[i].domain, j, &freest_map, maplens_);
         } else if (cpuinfo[j].cpu == freest) {
           LOG(INFO) << string::Sprintf("%s vCPU %ld is one of the freest\n",
-                 virDomainGetName(stats[i].domain), j);
+                                       virDomainGetName(stats[i].domain), j);
           virDomainPinVcpu(stats[i].domain, j, &busiest_map, maplens_);
         }
       }
@@ -187,8 +190,8 @@ private:
       if (vcpus_per_cpu_[i] != 0) {
         cpu_usage_[i] = cpu_usage_[i] / ((double)vcpus_per_cpu_[i]);
         LOG(INFO) << string::Sprintf(
-            "CPU %ld - # vCPUs assigned %d - usage %f%%", i,
-            vcpus_per_cpu_[i], cpu_usage_[i]);
+            "CPU %ld - # vCPUs assigned %d - usage %f%%", i, vcpus_per_cpu_[i],
+            cpu_usage_[i]);
       }
     }
 

@@ -6,8 +6,9 @@
 using namespace cloud;
 
 int main(int argc, char **argv) {
-  CHECK_EQ(argc, 2) << "ERROR: please provide one argument time interval (secs): "
-                    << "for instance, ./bin/memory_corrdinator 12";
+  CHECK_EQ(argc, 2)
+      << "ERROR: please provide one argument time interval (secs): "
+      << "for instance, ./bin/memory_corrdinator 12";
 
   auto secs = atoi(argv[1]);
   auto conn = LocalConnect();
