@@ -3,9 +3,9 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "domain.h"
 #include "log.h"
 #include "printf.h"
-#include "domain.h"
 
 namespace cloud {
 
@@ -68,12 +68,15 @@ public:
 
     if (do_nothing) {
       LOG(INFO) << string::Sprintf("Cannot or should not change pinnings");
-      LOG(INFO) << string::Sprintf("Busiest CPU: %d - Freest CPU: %d", busiest, freest);
+      LOG(INFO) << string::Sprintf("Busiest CPU: %d - Freest CPU: %d", busiest,
+                                   freest);
       return;
     }
 
-    LOG(INFO) << string::Sprintf("Busiest CPU: %d - Freest CPU: %d", busiest, freest);
-    LOG(INFO) << string::Sprintf("Busiest CPU above usage threshold of %f%%", USAGE_THRESHOLD);
+    LOG(INFO) << string::Sprintf("Busiest CPU: %d - Freest CPU: %d", busiest,
+                                 freest);
+    LOG(INFO) << string::Sprintf("Busiest CPU above usage threshold of %f%%",
+                                 USAGE_THRESHOLD);
     LOG(INFO) << string::Sprintf("Changing pinnings...");
 
     virVcpuInfoPtr cpuinfo;
@@ -83,6 +86,9 @@ public:
 
     // To do so iterate over all domains, over all vcpus and change
     // the busiest CPU vcpus for the freest ones and viceversa
+    size_t b[2], f[2];
+    double b_usage = 0.0, f_usage = 100.0;
+    bool is_enable_freest = false;
     for (size_t i = 0; i < num; i++) {
       cpuinfo = (virVcpuInfoPtr)calloc(stats[i].vcpus_num, sizeof(virVcpuInfo));
       cpumaps = (unsigned char *)calloc(stats[i].vcpus_num, maplens_);
@@ -90,17 +96,32 @@ public:
                         maplens_);
       for (size_t j = 0; j < stats[i].vcpus_num; j++) {
         if (cpuinfo[j].cpu == busiest) {
-          LOG(INFO) << string::Sprintf("%s vCPU %ld is one of the busiest\n",
-                 virDomainGetName(stats[i].domain), j);
-          virDomainPinVcpu(stats[i].domain, j, &freest_map, maplens_);
+          if (stats[i].usage[j] > b_usage) {
+            b_usage = stats[i].usage[j];
+            b[0] = i;
+            b[1] = j;
+          }
         } else if (cpuinfo[j].cpu == freest) {
-          LOG(INFO) << string::Sprintf("%s vCPU %ld is one of the freest\n",
-                 virDomainGetName(stats[i].domain), j);
-          virDomainPinVcpu(stats[i].domain, j, &busiest_map, maplens_);
+          if (stats[i].usage[j] < f_usage) {
+            f_usage = stats[i].usage[j];
+            f[0] = i;
+            f[1] = j;
+            is_enable_freest = true;
+          }
         }
       }
       free(cpuinfo);
       free(cpumaps);
+    }
+
+    LOG(INFO) << string::Sprintf("%s vCPU %ld is one of the busiest",
+                                 virDomainGetName(stats[b[0]].domain), b[1]);
+    virDomainPinVcpu(stats[b[0]].domain, b[1], &freest_map, maplens_);
+
+    if (is_enable_freest) {
+      LOG(INFO) << string::Sprintf("%s vCPU %ld is one of the freest",
+                                   virDomainGetName(stats[f[0]].domain), f[1]);
+      virDomainPinVcpu(stats[f[0]].domain, f[1], &busiest_map, maplens_);
     }
   }
 
@@ -185,10 +206,9 @@ private:
 
     for (size_t i = 0; i < maxcpus_; i++) {
       if (vcpus_per_cpu_[i] != 0) {
-        cpu_usage_[i] = cpu_usage_[i] / ((double)vcpus_per_cpu_[i]);
         LOG(INFO) << string::Sprintf(
-            "CPU %ld - # vCPUs assigned %d - usage %f%%", i,
-            vcpus_per_cpu_[i], cpu_usage_[i]);
+            "CPU %ld - # vCPUs assigned %d - usage %f%%", i, vcpus_per_cpu_[i],
+            cpu_usage_[i]);
       }
     }
 

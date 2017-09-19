@@ -1,0 +1,35 @@
+Script started on Tue 19 Sep 2017 08:21:44 AM EDT
+]0;osboxes@osboxes: ~/CPU-Scheduler-and-Memory-Coordinator-in-KVM/test[01;32mosboxes@osboxes[00m:[01;34m~/CPU-Scheduler-and-Memory-Coordinator-in-KVM/test[00m$ python u[Kru[K[K
+assignfiletoallvm.py  memory/               setallmemory.py
+cpu/                  pinallcpu0.py         shutdownallvm.py
+destroyallvm.py       setallmaxmemory.py    startallvm.py
+]0;osboxes@osboxes: ~/CPU-Scheduler-and-Memory-Coordinator-in-KVM/test[01;32mosboxes@osboxes[00m:[01;34m~/CPU-Scheduler-and-Memory-Coordinator-in-KVM/test[00m$ python cpu/r untest.[K1.py 
+Traceback (most recent call last):
+  File "cpu/runtest1.py", line 23, in <module>
+    vmlist = open(CONFIG_FILE, 'r').read().strip().split()
+IOError: [Errno 2] No such file or directory: '../vmlist.conf'
+]0;osboxes@osboxes: ~/CPU-Scheduler-and-Memory-Coordinator-in-KVM/test[01;32mosboxes@osboxes[00m:[01;34m~/CPU-Scheduler-and-Memory-Coordinator-in-KVM/test[00m$ cd [K[K[Kcd cpu/
+]0;osboxes@osboxes: ~/CPU-Scheduler-and-Memory-Coordinator-in-KVM/test/cpu[01;32mosboxes@osboxes[00m:[01;34m~/CPU-Scheduler-and-Memory-Coordinator-in-KVM/test/cpu[00m$ python r untest1.py 
+Pin firsttest to (True, False, False, False, False, False, False, False).
+Pin secondtest to (True, False, False, False, False, False, False, False).
+Pin thirdtest to (True, False, False, False, False, False, False, False).
+Pin fourthtest to (True, False, False, False, False, False, False, False).
+Pin fifthtest to (True, False, False, False, False, False, False, False).
+Pin sixthtest to (True, False, False, False, False, False, False, False).
+Pin seventhtest to (True, False, False, False, False, False, False, False).
+Pin eighthtest to (True, False, False, False, False, False, False, False).
+firsttest start running.
+secondtest start running.
+thirdtest start running.
+fourthtest start running.
+fifthtest start running.
+sixthtest start running.
+seventhtest start running.
+eighthtest start running.
+]0;osboxes@osboxes: ~/CPU-Scheduler-and-Memory-Coordinator-in-KVM/test/cpu[01;32mosboxes@osboxes[00m:[01;34m~/CPU-Scheduler-and-Memory-Coordinator-in-KVM/test/cpu[00m$ sign_and_send_pubkey: signing failed: agent refused operation
+Permission denied (publickey).
+python ruuntest1.py [A]0;osboxes@osboxes: ~/CPU-Scheduler-and-Memory-Coordinator-in-KVM/test/cpu[01;32mosboxes@osboxes[00m:[01;34m~/CPU-Scheduler-and-Memory-Coordinator-in-KVM/test/cpu[00m$ [K
+[K[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Cexit
+exit
+
+Script done on Tue 19 Sep 2017 08:23:08 AM EDT
