@@ -3,8 +3,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "log.h"
 #include "domain.h"
+#include "log.h"
 
 namespace cloud {
 
