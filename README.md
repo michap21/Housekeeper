@@ -1,4 +1,4 @@
-# Virtual Computing and Storage Resource Management 
+# Computing and Storage Resource Visualization and Management
 
 There are a lot of ways to create a virtual machine using kvm in linux. I will introduce the one I think is the most convenient.
 
@@ -45,6 +45,11 @@ There are a lot of ways to create a virtual machine using kvm in linux. I will i
     ``` shell
     uvt-kvm ssh firsttest --insecure
     ```
+
+### Demo
+
+<a href="demo.gif" target="_blank"><img src="demo.gif" width="1000" /></a>
+
 
 ### Reference:
 
