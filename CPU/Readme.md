@@ -64,3 +64,9 @@ When we want to schedule and balance CPUs pinning, we can simply use the above f
 ### Test
 
 This binary `vcpu_scheduler` has been verified by `test cases`. And the log files already generated in this folder, like `vcpu_scheduler1.log`. Please checkout them to find out more details.
+
+- [vcpu_scheduler1.log](vcpu_scheduler1.log)
+- [vcpu_scheduler2.log](vcpu_scheduler2.log)
+- [vcpu_scheduler3.log](vcpu_scheduler3.log)
+- [vcpu_scheduler4.log](vcpu_scheduler4.log)
+- [vcpu_scheduler5.log](vcpu_scheduler5.log)
