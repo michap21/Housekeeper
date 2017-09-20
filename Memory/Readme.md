@@ -18,16 +18,12 @@ make
 The algorithm used to calculate fairness is the following:
 
 * On every coordination period, find the most starve and the most wasted domains.
-* If the most starved domain is **below the starvation threshold**, we have to assign memory to it:
-  * If there is a memory wasting memory **above the waste threshold**, halve that domain's memory
-    and assign the same amount to the starved domain.
-  * If there is no domain wasting memory (most common case after a few cycles),
-    assign more memory to it (it assigns the current memory + the waste threshold).
-    The algorithm needs to be generous in this step, as memory intensive processes
-    will immediately consume the memory that's assigned in this step.
-  * If there is no starved domain but there is a wasteful domain, return memory from the
-    wasteful domain back to the host by getting 'wasteful.memory - WASTE_THRESHOLD'
-  * The last case, if there is no starved domain nor wasteful domains don't do anything.
+* If the most starved domain is below the starvation threshold, we have to assign memory to it
+  * 1. If wasted memory above the waste threshold, halve that domain's memory
+    and assign the same amount to the starve domain.
+  * 2. If there is no starve domain but there is a wasted domain, return memory from the
+    wasted domain back to the host.
+  * 3. if there is no starve domain nor wasted domains, don't do anything.
 * This is repeated until there are no active domains
 
 When we want to schedule and balance VMs memory, we can simply use the above functions according to the active domains. The source code could be as follows:
