@@ -7,4 +7,5 @@ memory_coordinator: memory_coordinator.cc
 	$(CC) -o memory_coordinator log.cc memory_coordinator.cc $(CFLAGS)
 
 clean:
-	memory_coordinator
+	rm memory_coordinator
+
