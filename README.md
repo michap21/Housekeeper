@@ -2,6 +2,12 @@
 
 There are a lot of ways to create a virtual machine using kvm in linux. I will introduce the one I think is the most convenient.
 
+### CPU
+
+
+
+### Memory
+
 ### Assumptions:
 
 1. Ubuntu 14.04 or later.
